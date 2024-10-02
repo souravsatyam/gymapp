@@ -37,7 +37,10 @@ const GymDetailScreen = ({navigation}) => {
           <Text style={styles.amenity}>Parking Space</Text>
           <Text style={styles.amenity}>Treadmills</Text>
         </View>
-        <TouchableOpacity style={styles.showAllButton}>
+        <TouchableOpacity 
+          style={styles.showAllButton} 
+          onPress={() => navigation.navigate('AmenitiesListScreen')} // Navigate to AmenitiesListScreen
+        >
           <Text style={styles.showAllButtonText}>Show all 21 amenities</Text>
         </TouchableOpacity>
 

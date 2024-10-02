@@ -12,21 +12,21 @@ export default function GymListScreen({ navigation }) {
       name: 'Fitness Gym Pro',
       description: 'High-quality equipment and trainers available.',
       rating: 4.5,
-      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww', // Replace with actual image URL
+      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww',
     },
     {
       id: '2',
       name: 'Superfit Gym',
       description: '24/7 availability and best workout environment.',
       rating: 4.7,
-      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww', // Replace with actual image URL
+      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww',
     },
     {
       id: '3',
       name: 'Power House Gym',
       description: 'Affordable pricing and great community.',
       rating: 4.2,
-      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww', // Replace with actual image URL
+      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww',
     },
   ]);
 
@@ -41,7 +41,6 @@ export default function GymListScreen({ navigation }) {
       <View style={styles.gymInfo}>
         <Text style={styles.gymName}>{item.name} ⭐ {item.rating}</Text>
         <Text style={styles.gymDescription}>{item.description}</Text>
-       
       </View>
     </TouchableOpacity>
   );
@@ -52,13 +51,13 @@ export default function GymListScreen({ navigation }) {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.locationContainer}>
-            <Text style={styles.locationText}><MaterialIcon name="location-on" size={18} color="#fff" />Hello World</Text>
+            <Text style={styles.locationText}><MaterialIcon name="location-on" size={18} color="#000" /> Hello World</Text>
           </View>
-          <TouchableOpacity onPress={() => alert('Notifications!')}>
-            <Text><Icon name="bell" size={24} color="#fff" /> </Text>{/* Notification icon */}
+          <TouchableOpacity onPress={() => navigation.navigate('NotificationListScreen')} >
+            <Text><Icon name="bell" size={24} color="#000" /> </Text>{/* Notification icon */}
           </TouchableOpacity>
         </View>
-        <Text style={styles.greetingText}>Hey, Sourav, looking for a gym or work out buddy?</Text>
+        <Text style={styles.greetingText}>Hey, Sourav, looking for a gym or workout buddy?</Text>
         <TextInput
           style={styles.searchInput}
           placeholder="Search gyms..."
@@ -75,7 +74,7 @@ export default function GymListScreen({ navigation }) {
         renderItem={renderGym}
         contentContainerStyle={styles.gymList}
       />
-        <Footer navigation={navigation} /> 
+      <Footer navigation={navigation} />
     </View>
   );
 }
@@ -83,38 +82,31 @@ export default function GymListScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000', // Black background
-  
+    backgroundColor: '#fff', // White background
   },
   header: {
     padding: 20,
-    backgroundColor: '#1c1c1c', // Dark background for header
+    backgroundColor: '#f8f8f8', // Light gray background for header
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  
   },
   locationContainer: {
     flexDirection: 'row',
-    alignItems: 'center', // Aligns icon and text vertically in center
+    alignItems: 'center',
   },
   locationText: {
-    fontSize: 12, // Reduced font size for location text
-    color: '#fff',
-
-  },
-  notificationIcon: {
-    padding: 5,
+    fontSize: 12,
+    color: '#000', // Black text for location
   },
   greetingText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff', // White text for the greeting
+    color: '#000', // Black text for the greeting
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -131,7 +123,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   gymCard: {
-    backgroundColor: '#1c1c1c', // Dark background for each gym card
+    backgroundColor: '#f0f0f0', // Light gray background for each gym card
     borderRadius: 10,
     marginBottom: 20,
     overflow: 'hidden',
@@ -147,17 +139,13 @@ const styles = StyleSheet.create({
   gymName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff', // White text
+    color: '#000', // Black text for gym name
     marginBottom: 5,
   },
   gymDescription: {
     fontSize: 14,
-    color: '#ccc', // Light gray text for description
+    color: '#333', // Dark gray text for description
     marginBottom: 10,
   },
-  gymRating: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#28a745', // Green color for rating
-  },
 });
+

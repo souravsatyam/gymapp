@@ -29,13 +29,13 @@ const LoginScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {/* Logo Image */}
-      <Image
+      {/* <Image
         source={{ uri: 'https://d250w8f359rhg6.cloudfront.net/static/media/logo-removebg-preview.783e77ab47a976cb321a.png' }} // Replace with your logo URL
         style={styles.logo}
         resizeMode="contain"
-      />
+      /> */}
 
-      <Text style={styles.title}>Welcome back! Glad to see you, Again!</Text>
+      <Text style={styles.title}>Welcome back! Glad to see you, Agains!</Text>
       <Text style={styles.subtitle}>Book Your Workout Anytime, Anywhere</Text>
 
       <TextInput

@@ -9,6 +9,10 @@ import OTPVerificationScreen from './screens/OTPVerificationScreen';
 import GymDetailScreen from './screens/GymDetailScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import InviteBuddiesScreen from './screens/InviteBuddiesScreen';
+import AmenitiesListScreen from './screens/AmenitiesListScreen';
+import NotificationListScreen from './screens/NotificationListScreen';
+import WorkoutInvitation from './screens/WorkoutInvitation';
+import WorkoutRequest from './screens/WorkoutRequest';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +28,11 @@ export default function App() {
         <Stack.Screen name="GymDetails" component={GymDetailScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="InviteBuddy" component={InviteBuddiesScreen} />
+        <Stack.Screen name="AmenitiesListScreen" component={AmenitiesListScreen} />
+        <Stack.Screen name="NotificationListScreen" component={NotificationListScreen} />
+        <Stack.Screen name="WorkoutInvitation" component={WorkoutInvitation} />
+        <Stack.Screen name="WorkoutRequest" component={WorkoutRequest} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
