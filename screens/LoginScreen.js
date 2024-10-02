@@ -8,21 +8,22 @@ const LoginScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const handleLogin = async () => {
-    if (!phoneNumber) {
-      Alert.alert('Error', 'Please enter your phone number.');
-      return;
-    }
+    navigation.navigate('OTPVerification', { mobileNumber: phoneNumber });
+    // if (!phoneNumber) {
+    //   Alert.alert('Error', 'Please enter your phone number.');
+    //   return;
+    // }
 
-    try {
-      const data = await loginUser(phoneNumber); // Call the API service
+    // try {
+    //   const data = await loginUser(phoneNumber); // Call the API service
 
-      // Navigate to OTP screen on successful login
-      navigation.navigate('OTPVerification', { mobileNumber: phoneNumber });
-    } catch (error) {
-      // Show error message if login failed
-      console.error(error);
-      Alert.alert('Login Failed', error.message);
-    }
+    //   // Navigate to OTP screen on successful login
+    //   navigation.navigate('OTPVerification', { mobileNumber: phoneNumber });
+    // } catch (error) {
+    //   // Show error message if login failed
+    //   console.error(error);
+    //   Alert.alert('Login Failed', error.message);
+    // }
   };
 
   return (
