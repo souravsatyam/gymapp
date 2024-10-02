@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const BASE_URL = 'https://094f-2401-4900-61a8-2123-6c3a-be0f-90d3-c211.ngrok-free.app/user/api'; // Change to HTTP for testing
+const BASE_URL = 'https://8ced-2401-4900-61c8-3482-d01f-a3c7-8408-6c72.ngrok-free.app/user/api'; // Change to HTTP for testing
 
 // Function to handle login
 export const loginUser = async (phoneNumber) => {

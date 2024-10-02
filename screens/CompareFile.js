@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome for notification icon
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons'; // For the location icon
-import Footer from '../components/Footer';
 
 export default function GymListScreen({ navigation }) {
   const [searchText, setSearchText] = useState(''); // State to track search input
@@ -39,9 +38,9 @@ export default function GymListScreen({ navigation }) {
     <TouchableOpacity style={styles.gymCard} onPress={() => navigation.navigate('GymDetails', { gymId: item.id })}>
       <Image source={{ uri: item.image }} style={styles.gymImage} />
       <View style={styles.gymInfo}>
-        <Text style={styles.gymName}>{item.name} ⭐ {item.rating}</Text>
+        <Text style={styles.gymName}>{item.name}</Text>
         <Text style={styles.gymDescription}>{item.description}</Text>
-       
+        <Text style={styles.gymRating}>⭐ {item.rating}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -52,7 +51,8 @@ export default function GymListScreen({ navigation }) {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.locationContainer}>
-            <Text style={styles.locationText}><MaterialIcon name="location-on" size={18} color="#fff" />Hello World</Text>
+    
+            <Text style={styles.locationText}><MaterialIcon name="location-on" size={18} color="#fff" />Downtown</Text> {/* Location text */}
           </View>
           <TouchableOpacity onPress={() => alert('Notifications!')}>
             <Text><Icon name="bell" size={24} color="#fff" /> </Text>{/* Notification icon */}
@@ -75,7 +75,6 @@ export default function GymListScreen({ navigation }) {
         renderItem={renderGym}
         contentContainerStyle={styles.gymList}
       />
-        <Footer navigation={navigation} /> 
     </View>
   );
 }
@@ -84,29 +83,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000', // Black background
-  
+    paddingTop: 20,
   },
   header: {
     padding: 20,
     backgroundColor: '#1c1c1c', // Dark background for header
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    
+    marginBottom: 20,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center', // Aligns icon and text vertically in center
   },
   locationText: {
-    fontSize: 12, // Reduced font size for location text
+    fontSize: 16, // Reduced font size for location text
     color: '#fff',
-
+    marginLeft: 5, // Spacing between icon and text
   },
   notificationIcon: {
     padding: 5,
