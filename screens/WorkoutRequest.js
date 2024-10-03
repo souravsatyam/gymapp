@@ -1,49 +1,56 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import the hook for navigation
 
 const WorkoutRequest = () => {
   const navigation = useNavigation(); // Get the navigation object
 
-  
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        <Text style={styles.highlightedText}>Invite</Text> Accepted!
-      </Text>
-
-      <View style={styles.detailsContainer}>
-        <Text style={styles.label}>Invitation Details:</Text>
-        
-        {/* Make the username clickable */}
-        <Text style={styles.detailText}>
-          {' '}
-          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-            <Text style={styles.username}>John</Text>
-          </TouchableOpacity>
-          {' '}has accepted your invitation to join the gym 
-          session.
+    // Wrap the entire view with ImageBackground for the background image
+    <ImageBackground 
+      source={require('../assets/gymBackground.png')} // Add your downloaded image path here
+      style={styles.background}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          <Text style={styles.highlightedText}>Invite</Text> Accepted!
         </Text>
-        
-        <Text style={styles.detailText}>Session Date & Time: <Text style={styles.bold}>September 15, 2024, 9:00 AM - 10:00 AM</Text></Text>
-        <Text style={styles.detailText}>Session Duration: <Text style={styles.bold}>1 hour</Text></Text>
-        <Text style={styles.detailText}>Gym Location: <Text style={styles.bold}>Bhanshankari, Bengaluru, IN 560085</Text></Text>
+
+        <View style={styles.detailsContainer}>
+          <Text style={styles.label}>Invitation Details:</Text>
+          
+          {/* Make the username clickable */}
+          <Text style={styles.detailText}>
+            {' '}
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+              <Text style={styles.username}>John</Text>
+            </TouchableOpacity>
+            {' '}has accepted your invitation to join the gym 
+            session.
+          </Text>
+          
+          <Text style={styles.detailText}>Session Date & Time: <Text style={styles.bold}>September 15, 2024, 9:00 AM - 10:00 AM</Text></Text>
+          <Text style={styles.detailText}>Session Duration: <Text style={styles.bold}>1 hour</Text></Text>
+          <Text style={styles.detailText}>Gym Location: <Text style={styles.bold}>Bhanshankari, Bengaluru, IN 560085</Text></Text>
+        </View>
+
+        <Text style={styles.footerText}>We look forward to seeing you there!</Text>
       </View>
-
-      
-
-      <Text style={styles.footerText}>We look forward to seeing you there!</Text>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover', // Adjust the background image to cover the whole screen
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: 'rgba(243, 244, 246, 0.8)', // Semi-transparent background to overlay on the image
   },
   title: {
     fontSize: 28,
@@ -88,29 +95,6 @@ const styles = StyleSheet.create({
   bold: {
     fontWeight: 'bold',
     color: '#28A745',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  button: {
-    borderRadius: 10,
-    padding: 15,
-    flex: 1,
-    marginHorizontal: 10,
-    elevation: 3,
-  },
-  acceptButton: {
-    backgroundColor: '#4CAF50',
-  },
-  declineButton: {
-    backgroundColor: '#F44336',
-  },
-  buttonText: {
-    color: '#ffffff',
-    textAlign: 'center',
-    fontWeight: 'bold',
   },
   footerText: {
     marginTop: 20,

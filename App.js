@@ -13,6 +13,9 @@ import AmenitiesListScreen from './screens/AmenitiesListScreen';
 import NotificationListScreen from './screens/NotificationListScreen';
 import WorkoutInvitation from './screens/WorkoutInvitation';
 import WorkoutRequest from './screens/WorkoutRequest';
+import MyBookings from './screens/MyBookings';
+import SlotSelectionScreen from './screens/SlotSelectionScreen';
+import PaymentScreen from './screens/PaymentConfirm';
 
 const Stack = createStackNavigator();
 
@@ -32,6 +35,9 @@ export default function App() {
         <Stack.Screen name="NotificationListScreen" component={NotificationListScreen} />
         <Stack.Screen name="WorkoutInvitation" component={WorkoutInvitation} />
         <Stack.Screen name="WorkoutRequest" component={WorkoutRequest} />
+        <Stack.Screen name="MyBookings" component={MyBookings} />
+        <Stack.Screen name="SlotSelectionScreen" component={SlotSelectionScreen} />
+        <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>
