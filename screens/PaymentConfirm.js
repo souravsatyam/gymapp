@@ -1,15 +1,35 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Entypo from 'react-native-vector-icons/Entypo';
+import RazorpayCheckout from 'react-native-razorpay';
 
 const PaymentScreen = ({ route, navigation }) => {
   const { slotDetails } = route.params; // Extract slot details from navigation parameters
+  
 
   const handlePayment = () => {
-    // Navigate to ConfirmationScreen and pass the slot details
-    navigation.navigate('ConfirmationScreen', { slotDetails });
+    
+    var options = {
+      description: 'Credits towards consultation',
+      image: 'https://i.imgur.com/3g7nmJC.png',
+      currency: 'INR',
+      key: 'QaunL5f3pREFgj4wZXgruC57', // Your api key
+      amount: slotDetails.price * (slotDetails.duration/60), // Amount in paisa (50000 paisa = ₹500),
+      name: 'foo',
+      prefill: {
+        email: 'void@razorpay.com',
+        contact: '9191919191',
+        name: 'Razorpay Software'
+      },
+      theme: {color: '#F37254'}
+    }
+    RazorpayCheckout.open(options).then((data) => {
+      // handle success
+      Alert.alert(`Success: Payment ID: ${data.razorpay_payment_id}`);
+    }).catch((error) => {
+      // handle failure
+      Alert.alert(`Error: ${error.code} | ${error.description}`);
+    });
   };
 
   return (
@@ -27,6 +47,7 @@ const PaymentScreen = ({ route, navigation }) => {
           </Text>
           <Text style={styles.gymLocation}>Location: 123 Fitness St, Fit City</Text>
         </View>
+<<<<<<< HEAD
 
         {/* Slot Details Section */}
         <View style={styles.card}>
@@ -49,6 +70,19 @@ const PaymentScreen = ({ route, navigation }) => {
               <Text style={styles.price}>Price: ${slotDetails.price}</Text>
             </View>
           </View>
+=======
+        <View style={styles.detailRow}>
+          <Icon name="access-time" size={24} color="#2e7d32" />
+          <Text style={styles.detail}>Time: {slotDetails.time}</Text>
+        </View>
+        <View style={styles.detailRow}>
+          <Icon name="hourglass-empty" size={24} color="#2e7d32" />
+          <Text style={styles.detail}>Duration: {slotDetails.duration} mn</Text>
+        </View>
+        <View style={styles.detailRow}>
+          <Icon name="attach-money" size={24} color="#2e7d32" />
+          <Text style={styles.price}>Price: INR {slotDetails.price * (slotDetails.duration/60)}</Text>
+>>>>>>> e86ab65278014d9a269f820fc67dab268fb9e97f
         </View>
 
         <TouchableOpacity style={styles.button} onPress={handlePayment}>

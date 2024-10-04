@@ -17,6 +17,7 @@ const ProfileScreen = ({ navigation }) => {
     const fetchUserData = async () => {
       try {
         const data = await userDetails();
+        console.log("Data is", data);
         setUserData(data);
         setLoading(false);
       } catch (error) {
