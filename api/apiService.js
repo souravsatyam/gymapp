@@ -3,7 +3,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://adff-2401-4900-6198-20ae-b4cd-8a36-2dfe-72b2.ngrok-free.app/user/api'; // Change to HTTP for testing
+const BASE_URL = 'https://bfe8-2401-4900-61b8-20a8-f8-b413-bea1-a07f.ngrok-free.app/user/api'; // Change to HTTP for testing
 
 // Function to handle login
 export const loginUser = async (phoneNumber) => {
@@ -163,5 +163,66 @@ export const verifyOtp = async (mobileNumber, otp) => {
     } catch (error) {
       console.error('Error sending friend request:', error);
       throw error;
+    }
+  };
+
+
+
+  export const createBooking = async (slotDetails) => {
+    console.log("slotDetails.date", slotDetails.date);
+    try {
+   
+        const [month, day, year] = slotDetails.date.split('/'); // Split by '/' 
+
+// Create a new date object in the format YYYY-MM-DD
+        const parsedDate = new Date(`${year}-${month}-${day}`);
+        const bookingDate = parsedDate.toISOString(); // Convert to ISO format
+      const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+      const response = await axios.post(`${BASE_URL}/booking/create`, {
+        slotId: slotDetails.slotId, // slot ID
+        gymId: slotDetails.gymId,   // gym ID
+        bookingDate: bookingDate, // current date
+        subscriptionType: "daily", // subscription type
+        subscriptionId: slotDetails.subscriptionId,         // subscription ID
+        paymentId: slotDetails?.paymentId || Date.now.toString(),              // razorpay payment ID
+      },{
+        headers: {
+          Authorization: `Bearer ${userToken}`,  // Add the Bearer token here
+        },
+      });
+      
+      // Handle response
+      console.log("Response Status", response.status);
+      if (response.status === 200 || response.status === 201) {
+       
+        return true;
+      } else {
+      
+        return false;
+      }
+    } catch (error) {
+      console.log("Error is", error);
+      return false;
+    }
+  };
+
+
+
+  export const fetchAllBookings = async () => {
+    try {
+      const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+      const response = await fetch(`${BASE_URL}/booking/get`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${userToken}`, // Include the bearer token
+        },
+      }); // Your API endpoint
+      const data = await response.json();
+
+    
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
     }
   };

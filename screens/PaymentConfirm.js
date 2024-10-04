@@ -1,35 +1,42 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import RazorpayCheckout from 'react-native-razorpay';
+import { createBooking } from '../api/apiService';
 
 const PaymentScreen = ({ route, navigation }) => {
   const { slotDetails } = route.params; // Extract slot details from navigation parameters
   
-
-  const handlePayment = () => {
-    
-    var options = {
-      description: 'Credits towards consultation',
-      image: 'https://i.imgur.com/3g7nmJC.png',
-      currency: 'INR',
-      key: 'QaunL5f3pREFgj4wZXgruC57', // Your api key
-      amount: slotDetails.price * (slotDetails.duration/60), // Amount in paisa (50000 paisa = ₹500),
-      name: 'foo',
-      prefill: {
-        email: 'void@razorpay.com',
-        contact: '9191919191',
-        name: 'Razorpay Software'
-      },
-      theme: {color: '#F37254'}
+  console.log("slotDetails", slotDetails);
+  const handlePayment = async () => {
+    const data = await createBooking(slotDetails);
+    if(data) {
+      navigation.navigate('ConfirmationScreen', {slotDetails});
+    } else {
+      Alert.alert("Some error occured while booking slot");
     }
-    RazorpayCheckout.open(options).then((data) => {
-      // handle success
-      Alert.alert(`Success: Payment ID: ${data.razorpay_payment_id}`);
-    }).catch((error) => {
-      // handle failure
-      Alert.alert(`Error: ${error.code} | ${error.description}`);
-    });
+    
+    // var options = {
+    //   description: 'Credits towards consultation',
+    //   image: 'https://i.imgur.com/3g7nmJC.png',
+    //   currency: 'INR',
+    //   key: 'QaunL5f3pREFgj4wZXgruC57', // Your api key
+    //   amount: slotDetails.price * (slotDetails.duration/60), // Amount in paisa (50000 paisa = ₹500),
+    //   name: 'foo',
+    //   prefill: {
+    //     email: 'void@razorpay.com',
+    //     contact: '9191919191',
+    //     name: 'Razorpay Software'
+    //   },
+    //   theme: {color: '#F37254'}
+    // }
+    // RazorpayCheckout.open(options).then((data) => {
+    //   // handle success
+    //   Alert.alert(`Success: Payment ID: ${data.razorpay_payment_id}`);
+    // }).catch((error) => {
+    //   // handle failure
+    //   Alert.alert(`Error: ${error.code} | ${error.description}`);
+    // });
   };
 
   return (
@@ -40,37 +47,13 @@ const PaymentScreen = ({ route, navigation }) => {
 
         {/* Gym Information Section */}
         <View style={styles.card}>
-          <Text style={styles.gymName}>Test Gym Name</Text>
+          <Text style={styles.gymName}>{slotDetails.gymName}</Text>
           <Text style={styles.gymDescription}>
-            Welcome to Test Gym, your ultimate fitness destination!
+            Welcome to {slotDetails.gymName}, your ultimate fitness destination!
             We offer a variety of classes and personal training options to fit your needs.
           </Text>
           <Text style={styles.gymLocation}>Location: 123 Fitness St, Fit City</Text>
         </View>
-<<<<<<< HEAD
-
-        {/* Slot Details Section */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Slot Details</Text>
-          <View style={styles.slotDetails}>
-            <View style={styles.detailRow}>
-              <FontAwesome name="calendar" size={24} color="#2e7d32" />
-              <Text style={styles.detail}>Date: {slotDetails.date}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <FontAwesome name="clock-o" size={24} color="#2e7d32" />
-              <Text style={styles.detail}>Time: {slotDetails.time}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Icon name="hourglass-empty" size={24} color="#2e7d32" />
-              <Text style={styles.detail}>Duration: {slotDetails.duration} mn</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Entypo name="price-tag" size={24} color="#2e7d32" />
-              <Text style={styles.price}>Price: ${slotDetails.price}</Text>
-            </View>
-          </View>
-=======
         <View style={styles.detailRow}>
           <Icon name="access-time" size={24} color="#2e7d32" />
           <Text style={styles.detail}>Time: {slotDetails.time}</Text>
@@ -80,9 +63,8 @@ const PaymentScreen = ({ route, navigation }) => {
           <Text style={styles.detail}>Duration: {slotDetails.duration} mn</Text>
         </View>
         <View style={styles.detailRow}>
-          <Icon name="attach-money" size={24} color="#2e7d32" />
+         
           <Text style={styles.price}>Price: INR {slotDetails.price * (slotDetails.duration/60)}</Text>
->>>>>>> e86ab65278014d9a269f820fc67dab268fb9e97f
         </View>
 
         <TouchableOpacity style={styles.button} onPress={handlePayment}>

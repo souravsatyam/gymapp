@@ -14,7 +14,7 @@ const GymDetailScreen = ({ navigation, route }) => {
 
   const { gym_id } = route.params; // Assuming gym_id is passed via route params
   console.log("Gym Id", gym_id);
-  
+
   useEffect(() => {
     fetchGymData();
   }, []);
@@ -67,12 +67,12 @@ const GymDetailScreen = ({ navigation, route }) => {
   const renderSvg = (svgString) => {
     const regex = /<svg[^>]*>(.*?)<\/svg>/s; // Regex to extract SVG content
     const match = svgString.match(regex);
-    
+
     if (match) {
       const svgContent = match[1];
       const pathRegex = /<path[^>]*\/?>/g; // Extract paths from the SVG
       const paths = svgContent.match(pathRegex);
-      
+
       return paths.map((path, index) => {
         const attributes = path.match(/(\w+)="([^"]*)"/g); // Extract attributes
         const props = {};
@@ -83,15 +83,15 @@ const GymDetailScreen = ({ navigation, route }) => {
         return <Path key={index} {...props} />;
       });
     }
-  
+
     return null;
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView 
-        style={styles.scrollView} 
-        contentContainerStyle={styles.scrollContent} 
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerContainer}>
@@ -137,27 +137,32 @@ const GymDetailScreen = ({ navigation, route }) => {
           </View>
         </View>
 
-        <Text style={styles.amenitiesTitle}>What this gym offers:</Text>
-        <View style={styles.amenities}>
-          {gymData?.equipment_list?.length > 0 ? (
-            gymData.equipment_list.slice(0, showAllAmenities ? undefined : 4).map((amenity, index) => (
-              <View key={index} style={styles.amenityContainer}>
-                <Svg height="24" width="24" style={styles.icon}>
-                  {renderSvg(amenity.equipment_icon_svg)}
-                </Svg>
-                <Text style={styles.amenityText}>
-                  {amenity.equipment_name || 'Unnamed Equipment'}
-                </Text>
-              </View>
-            ))
-          ) : (
-            <Text style={styles.noAmenitiesText}>No amenities listed by gym.</Text>
-          )}
+      
+        <View style={styles.amenitiesContainer}>
+          <Text style={styles.amenitiesTitle}>What this gym offers:</Text>
+          <View style={styles.amenities}>
+            {gymData?.equipment_list?.length > 0 ? (
+              gymData.equipment_list.slice(0, showAllAmenities ? undefined : 4).map((amenity, index) => (
+                <View key={index} style={styles.amenityItem}>
+                  <View style={styles.iconContainer}>
+                    <Svg height="24" width="24" style={styles.icon}>
+                      {renderSvg(amenity.equipment_icon_svg)}
+                    </Svg>
+                  </View>
+                  <Text style={styles.amenityText}>{amenity.equipment_name || 'Unnamed Equipment'}</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.noAmenitiesText}>No amenities listed by gym.</Text>
+            )}
+          </View>
+
+          <TouchableOpacity onPress={toggleShowAll}>
+            <Text style={styles.showAllText}>{showAllAmenities ? 'Show Less' : 'Show All'}</Text>
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={toggleShowAll}>
-          <Text style={styles.showAllText}>{showAllAmenities ? 'Show Less' : 'Show All'}</Text>
-        </TouchableOpacity>
+      
 
         {/* Additional spacing at the bottom */}
         <View style={styles.bottomSpacing} />
@@ -185,7 +190,7 @@ const GymDetailScreen = ({ navigation, route }) => {
             <Text style={styles.closeButtonText}>✖️</Text>
           </TouchableOpacity>
           {/* Render slot selection screen */}
-          <SlotSelectionScreen navigation={navigation} gym={gymData}/>
+          <SlotSelectionScreen navigation={navigation} gym={gymData} />
         </View>
       </Modal>
     </View>
@@ -270,13 +275,16 @@ const styles = StyleSheet.create({
   amenities: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'flex-start', // Make sure items align at the start
+    width: '100%', // Ensure it takes full width
   },
   amenity: {
-    fontSize: 16, // Increased font size
-    color: '#4CAF50', // Green color for amenities
+    fontSize: 16, // Larger font size
+    color: '#4CAF50', // Green color
     marginBottom: 10,
-    marginRight: 15,
-    fontWeight: '500', // Semi-bold for better emphasis
+    marginRight: 10, // Reduce marginRight to fit more items in one row
+    fontWeight: '500', // Semi-bold text
+    flexBasis: '30%', // Make each item take up around 30% of the row
   },
   showAllText: {
     color: '#1E90FF', // Brighter blue color to stand out
@@ -287,7 +295,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline', // Underline for emphasis
     letterSpacing: 1.5, // Add spacing between letters
     fontFamily: 'Cochin', // Use a more elegant font (iOS) or set a custom one
-  
+
   },
   bottomSpacing: {
     height: 100, // Space for the button
@@ -331,6 +339,62 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     padding: 20,
+  },
+  amenitiesContainer: {
+    marginVertical: 20,
+  },
+  amenitiesTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  amenities: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between', // Add space between items
+  },
+  amenityItem: {
+    backgroundColor: '#f8f8f8', // Light background for each item
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    marginRight: 10,
+    width: '45%', // Adjust width to fit two items per row
+    alignItems: 'center', // Center icon and text
+    justifyContent: 'center',
+    elevation: 2, // Add shadow for elevation
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#e0e0e0', // Gray background for icons
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+  },
+  amenityText: {
+    fontSize: 16,
+    color: '#4CAF50', // Green color for amenity text
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  noAmenitiesText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+  },
+  showAllText: {
+    color: '#1E90FF',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 10,
+    textDecorationLine: 'underline',
   },
 });
 

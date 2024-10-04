@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/Ionicons'; // Importing Ionicons for icons
 
 const SlotSelectionScreen = ({ navigation, gym }) => {
+  console.log("gymn is", gym.subscriptions[0].id);
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState(60); // Default duration
@@ -26,17 +27,20 @@ const SlotSelectionScreen = ({ navigation, gym }) => {
       Alert.alert("Please select a time.");
       return;
     }
-    console.log("selectedSlot.price", selectedSlot.price);
+    console.log("selectedSlot.price", gym);
     // Prepare the slot details to pass to PaymentScreen
     const slotDetails = {
       date: date.toLocaleDateString(),
       time: selectedSlot.startTime,
       duration: selectedDuration,
       gymName: gym.name,
+      gymId: gym.id,
       price: selectedSlot.price,
       slotId: selectedSlot.id,
       capacity: selectedSlot.capacity,
       pricePerSlot: selectedSlot.price,
+      subscriptionId: gym?.subscriptions[0].id
+
     };
 
     // Navigate to PaymentScreen with slot details
