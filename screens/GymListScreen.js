@@ -35,8 +35,7 @@ export default function GymListScreen({ navigation }) {
   );
 
   const redirectToGymDetails = (gymId) => {
- 
-    navigation.navigate('GymDetails', { gym_id: gymId })
+    navigation.navigate('GymDetails', { gym_id: gymId });
   }
 
   // Render each gym
@@ -99,7 +98,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: '#f0f0f0', // Light gray for header
+    backgroundColor: '#ffffff', // White background for header
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
@@ -136,45 +135,49 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   gymCard: {
-    backgroundColor: '#e0e0e0', // Light gray for each gym card
+    backgroundColor: '#ffffff', // White background for each gym card
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 10, // Reduced margin for smaller container size
     overflow: 'hidden',
+    elevation: 2, // Slight shadow effect on Android
+    height : 300
   },
   gymImage: {
     width: '100%',
-    height: 150,
+    height: 200, // Image height stays the same
     resizeMode: 'cover',
   },
   gymInfo: {
-    padding: 10,
+    padding: 6, // Reduced padding to decrease the container height
+    paddingTop: 4,
   },
   gymName: {
-    fontSize: 16, // Adjusted font size
+    fontSize: 15,
     fontWeight: 'bold',
-    color: '#000', // Black text for gym name
-    marginBottom: 5,
+    color: '#000',
+    marginBottom: 3, // Reduced margin
   },
   gymPrice: {
-    fontSize: 14, // Adjusted font size
-    color: '#000', // Black text for price
-    marginBottom: 5,
+    fontSize: 13,
+    color: '#000',
+    marginBottom: 3, // Reduced margin
   },
   gymRating: {
-    fontSize: 14, // Adjusted font size
-    color: 'green', // Changed star rating color to green
-    marginBottom: 5,
+    fontSize: 13,
+    color: 'green',
+    marginBottom: 3, // Reduced margin
   },
   bookNowButton: {
-    backgroundColor: 'green', // Green background color for "Book Now" button
+    backgroundColor: 'green',
     borderRadius: 5,
-    paddingVertical: 5,
+    paddingVertical: 6,
     paddingHorizontal: 10,
-    alignSelf: 'flex-end', // Align to the right
-    marginTop: 10, // Space above the button
+    alignSelf: 'center', // Center the button
+    marginTop: -28, // No margin to shift it up
+    marginRight : -300
   },
   bookNowText: {
-    color: '#fff', // White text color for "Book Now"
+    color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
   },

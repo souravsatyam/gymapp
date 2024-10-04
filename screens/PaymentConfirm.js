@@ -1,82 +1,115 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 const PaymentScreen = ({ route, navigation }) => {
   const { slotDetails } = route.params; // Extract slot details from navigation parameters
 
   const handlePayment = () => {
-    Alert.alert("Payment processed!");
-    // Add further payment processing logic here
+    // Navigate to ConfirmationScreen and pass the slot details
+    navigation.navigate('ConfirmationScreen', { slotDetails });
   };
 
   return (
     <ImageBackground
-      //source={{ uri: 'https://media.istockphoto.com/id/866702538/photo/sprinter-running-on-track.jpg?s=2048x2048&w=is&k=20&c=WLGSCN0rR3A4lQq7VWmdRpDEWjH5kf-D9bQ8qIzvMVQ=' }}
-      style={styles.container}
+      style={styles.background}
     >
-      <View style={styles.overlay} />
+      <View style={styles.container}>
 
-      <Text style={styles.title}>Payment Screen</Text>
-      <View style={styles.detailsContainer}>
-        <View style={styles.detailRow}>
-          <Icon name="calendar-today" size={24} color="#2e7d32" />
-          <Text style={styles.detail}>Date: {slotDetails.date}</Text>
+        {/* Gym Information Section */}
+        <View style={styles.card}>
+          <Text style={styles.gymName}>Test Gym Name</Text>
+          <Text style={styles.gymDescription}>
+            Welcome to Test Gym, your ultimate fitness destination!
+            We offer a variety of classes and personal training options to fit your needs.
+          </Text>
+          <Text style={styles.gymLocation}>Location: 123 Fitness St, Fit City</Text>
         </View>
-        <View style={styles.detailRow}>
-          <Icon name="access-time" size={24} color="#2e7d32" />
-          <Text style={styles.detail}>Time: {slotDetails.time}</Text>
+
+        {/* Slot Details Section */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>Slot Details</Text>
+          <View style={styles.slotDetails}>
+            <View style={styles.detailRow}>
+              <FontAwesome name="calendar" size={24} color="#2e7d32" />
+              <Text style={styles.detail}>Date: {slotDetails.date}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <FontAwesome name="clock-o" size={24} color="#2e7d32" />
+              <Text style={styles.detail}>Time: {slotDetails.time}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Icon name="hourglass-empty" size={24} color="#2e7d32" />
+              <Text style={styles.detail}>Duration: {slotDetails.duration} mn</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Entypo name="price-tag" size={24} color="#2e7d32" />
+              <Text style={styles.price}>Price: ${slotDetails.price}</Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.detailRow}>
-          <Icon name="hourglass-empty" size={24} color="#2e7d32" />
-          <Text style={styles.detail}>Duration: {slotDetails.duration} mn</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Icon name="attach-money" size={24} color="#2e7d32" />
-          <Text style={styles.price}>Price: ${slotDetails.price}</Text>
-        </View>
+
+        <TouchableOpacity style={styles.button} onPress={handlePayment}>
+          <Text style={styles.buttonText}>Proceed</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Text style={styles.backButtonText}>Go Back</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.button} onPress={handlePayment}>
-        <Text style={styles.buttonText}>Make Payment</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.backButtonText}>Go Back</Text>
-      </TouchableOpacity>
     </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Light overlay for text readability
-    borderRadius: 10,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#2e7d32', // Dark green text
-    marginBottom: 20,
-    fontFamily: 'Roboto', // Stylish font
-  },
-  detailsContainer: {
-    backgroundColor: '#fff',
+  container: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     padding: 20,
     borderRadius: 10,
-    elevation: 2,
-    marginBottom: 20,
-    width: '80%', // Set width to a percentage for better responsiveness
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    width: '90%',
+    elevation: 5,
+    marginVertical: 50,
+  },
+  gymName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+    marginBottom: 5,
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+  },
+  gymDescription: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 10,
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+  },
+  gymLocation: {
+    fontSize: 16,
+    color: '#555',
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+    marginBottom: 10,
+    textAlign: 'left',
+  },
+  slotDetails: {
+    marginTop: 10,
   },
   detailRow: {
     flexDirection: 'row',
@@ -87,21 +120,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#333',
     marginLeft: 10,
-    fontFamily: 'Roboto', // Stylish font
+    fontFamily: 'Roboto',
   },
   price: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2e7d32', // Dark green price text
+    color: '#2e7d32',
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#2e7d32', // Dark green button
+    backgroundColor: '#2e7d32',
     padding: 15,
     borderRadius: 10,
-    width: '80%', // Set width to a percentage for better responsiveness
+    width: '100%',
     alignItems: 'center',
-    elevation: 3,
+    elevation: 5,
+    marginTop: 20,
   },
   buttonText: {
     color: '#fff',
@@ -110,14 +144,14 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginTop: 10,
-    backgroundColor: '#c8e6c9', // Light green for back button
+    backgroundColor: '#c8e6c9',
     padding: 15,
     borderRadius: 10,
-    width: '80%', // Set width to a percentage for better responsiveness
+    width: '100%',
     alignItems: 'center',
   },
   backButtonText: {
-    color: '#2e7d32', // Dark green text for back button
+    color: '#2e7d32',
     fontSize: 18,
   },
 });

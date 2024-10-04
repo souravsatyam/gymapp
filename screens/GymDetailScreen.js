@@ -34,6 +34,7 @@ const GymDetailScreen = ({ navigation, route }) => {
     setCurrentIndex(index);
   };
 
+
   const openModal = (image) => {
     setSelectedImage(image);
     setModalVisible(true);
@@ -95,8 +96,7 @@ const GymDetailScreen = ({ navigation, route }) => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerContainer}>
-          <Text style={styles.welcomeText}>Welcome back!</Text>
-          <Text style={styles.userName}>Deepak Parmar</Text>
+          <Text style={styles.userName}>Hi Deepak Parmar</Text>
           <Text style={styles.bookingPrompt}>Want to book your gym sessions with just a tap?</Text>
 
           <ScrollView
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   },
   button: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 20, // Reduced bottom value to move the button up
     left: 0,
     right: 0,
     backgroundColor: '#4CAF50',

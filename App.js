@@ -4,7 +4,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import GymListScreen from './screens/GymListScreen';
-import BookingConfirmationScreen from './screens/BookingConfirmationScreen';
 import OTPVerificationScreen from './screens/OTPVerificationScreen';
 import GymDetailScreen from './screens/GymDetailScreen';
 import ProfileScreen from './screens/ProfileScreen';
@@ -16,6 +15,7 @@ import WorkoutRequest from './screens/WorkoutRequest';
 import MyBookings from './screens/MyBookings';
 import SlotSelectionScreen from './screens/SlotSelectionScreen';
 import PaymentScreen from './screens/PaymentConfirm';
+import ConfirmationScreen from './screens/ConfirmationScreen';
 
 const Stack = createStackNavigator();
 
@@ -26,7 +26,7 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="GymList" component={GymListScreen} />
-        <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
+        <Stack.Screen name="ConfirmationScreen" component={ConfirmationScreen} />
         <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
         <Stack.Screen name="GymDetails" component={GymDetailScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />

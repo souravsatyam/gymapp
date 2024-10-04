@@ -15,6 +15,8 @@ const SlotSelectionScreen = ({ navigation }) => {
   const availableTimes = [];
   const currentDate = new Date();
 
+  
+
   // Generate available times in 30-minute intervals for the next 24 hours
   for (let hour = 0; hour < 24; hour++) {
     for (let minute = 0; minute <= 30; minute += 30) {
@@ -219,7 +221,7 @@ const styles = StyleSheet.create({
   durationButton: {
     width: 80, // Set a fixed width for square layout
     height: 80, // Set a fixed height for square layout
-    backgroundColor: '#28a745', // Uniform color for duration buttons
+    backgroundColor: '#a5d6a7', // Uniform color for duration buttons
     borderRadius: 10,
     margin: 5, // Add margin around buttons for spacing
     alignItems: 'center',

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import the navigation hook
 
+
 const MyBookings = () => {
   // State to track which tab is selected
   const [activeTab, setActiveTab] = useState('Upcoming');
@@ -71,7 +72,7 @@ const MyBookings = () => {
               {/* Actions (Cancel) */}
               <View style={styles.actionsContainer}>
                 <TouchableOpacity style={styles.cancelButton}>
-                  <Text style={styles.cancelButtonText}>Cancel Booking</Text>
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -105,7 +106,7 @@ const MyBookings = () => {
                   <Text style={styles.inviteText}>Total Invites: {totalInvites}</Text>
                 </View>
               </View>
-
+              <Footer navigation={navigation} />
               {/* Actions (Book Again) */}
               <View style={styles.actionsContainer}>
                 <TouchableOpacity style={styles.bookAgainButton}>
@@ -236,16 +237,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   cancelButton: {
-    backgroundColor: '#F44336', // Red color for the cancel button
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
     borderRadius: 10,
-    elevation: 2,
-    shadowColor: '#000', // Add shadow for depth
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    marginLeft: 10, // Space between buttons
   },
   cancelButtonText: {
     color: '#FFFFFF',
