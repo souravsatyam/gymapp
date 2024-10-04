@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
-import { ProgressBar } from 'react-native-paper'; // Ensure react-native-paper is installed
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Import icons from react-native-vector-icons
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, FlatList, ScrollView, ActivityIndicator } from 'react-native';
+import { ProgressBar } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import ImagePicker from 'react-native-image-picker';
 import Footer from '../components/Footer';
-import { userDetails } from '../api/apiService';
+import { userDetails } from '../api/apiService'; // Ensure you have the correct path
 
 const ProfileScreen = ({ navigation }) => {
+  const [profileImage, setProfileImage] = useState('https://via.placeholder.com/150');
+  const [images, setImages] = useState([]);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -13,7 +16,6 @@ const ProfileScreen = ({ navigation }) => {
     // Fetch user data from the API
     const fetchUserData = async () => {
       try {
-      
         const data = await userDetails();
         console.log("Data is", data);
         setUserData(data);
@@ -27,6 +29,58 @@ const ProfileScreen = ({ navigation }) => {
     fetchUserData();
   }, []);
 
+  const selectProfileImage = () => {
+    const options = {
+      title: 'Select Profile Photo',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    };
+
+    ImagePicker.showImagePicker(options, (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        Alert.alert('Error', 'Error picking image');
+      } else {
+        const source = { uri: response.uri };
+        setProfileImage(source.uri);
+      }
+    });
+  };
+
+  const selectImages = () => {
+    const options = {
+      title: 'Select Images',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+      quality: 0.5,
+      allowsEditing: false,
+      mediaType: 'photo',
+      selectionLimit: 0, // 0 for unlimited selection
+    };
+
+    ImagePicker.showImagePicker(options, (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        Alert.alert('Error', 'Error picking images');
+      } else {
+        const selectedImages = response.uri ? [{ uri: response.uri }] : [];
+        setImages((prevImages) => [...prevImages, ...selectedImages]);
+      }
+    });
+  };
+
+  const renderItem = ({ item }) => (
+    <View style={styles.gridItem}>
+      <Image source={item} style={styles.gridImage} />
+    </View>
+  );
+
   if (loading) {
     return (
       <View style={styles.loader}>
@@ -36,188 +90,230 @@ const ProfileScreen = ({ navigation }) => {
   }
 
   return (
-    <>
-      <ScrollView style={styles.container}>
-        {/* Profile Header */}
+    <View style={styles.container}>
+      {/* Profile Header with Stats */}
+      <View style={styles.headerContainer}>
         <View style={styles.profileHeader}>
-          <Image
-            source={{ uri: userData?.profile_pic || 'https://via.placeholder.com/150' }} // Placeholder image if profile_pic is null
-            style={styles.profileImage}
-          />
+          <View style={styles.profileImageContainer}>
+            <Image source={{ uri: userData?.profile_pic || profileImage }} style={styles.profileImage} />
+            <TouchableOpacity style={styles.addPhotoButton} onPress={selectProfileImage}>
+              <Icon name="plus" size={20} color="#4CAF50" />
+            </TouchableOpacity>
+          </View>
           <View style={styles.profileDetails}>
             <Text style={styles.fullName}>{userData?.full_name || 'N/A'}</Text>
             <Text style={styles.username}>@{userData?.username || 'N/A'}</Text>
             <Text style={styles.mobileNumber}>{userData?.mobile_number || 'N/A'}</Text>
           </View>
         </View>
+        <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Settings')}>
+          <Icon name="cog" size={20} color="#4CAF50" />
+        </TouchableOpacity>
+      </View>
 
-        {/* Stats */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{userData?.upload_count || 0}</Text>
-            <Text style={styles.statLabel}>Posts</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{userData?.followers_count || 0}</Text>
-            <Text style={styles.statLabel}>Friends</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{userData?.following_count || 0}</Text>
-            <Text style={styles.statLabel}>Buddies</Text>
-          </View>
+      {/* Combined Stats Container */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{userData?.upload_count || 0}</Text>
+          <Text style={styles.statLabel}>Posts</Text>
         </View>
-
-        {/* Workout Time */}
-        <View style={styles.workoutContainer}>
-          <Text style={styles.workoutLabel}>Workout Time</Text>
-          <Text style={styles.workoutTime}>{userData?.total_work_out_time || 0} h.</Text>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{userData?.followers_count || 0}</Text>
+          <Text style={styles.statLabel}>Friends</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statValueTime}>{userData?.total_work_out_time || 0} h.</Text>
+          <Text style={styles.statLabel}>Workout Time</Text>
           <ProgressBar progress={0.75} color="#4CAF50" style={styles.progressBar} />
         </View>
+      </View>
 
-        {/* Buttons with Icons */}
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.button}>
-            <Icon name="dumbbell" size={24} color="#fff" />
-            <Text style={styles.buttonText}>Visited Gyms</Text>
-            <Text style={styles.showAllText}>Show all</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            <Icon name="account-group" size={24} color="#fff" />
-            <Text style={styles.buttonText}>Gym Buddies</Text>
-            <Text style={styles.showAllText}>Show all</Text>
-          </TouchableOpacity>
-        </View>
+      {/* Action Buttons */}
+      <View style={styles.buttonsRow}>
+        <TouchableOpacity style={styles.button}>
+          <Icon name="dumbbell" size={20} color="#fff" />
+          <Text style={styles.buttonText}>Visited Gyms</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button}>
+          <Icon name="account-group" size={20} color="#fff" />
+          <Text style={styles.buttonText}>Gym Buddies</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.addButton} onPress={selectImages}>
+          <Icon name="plus" size={16} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-        {/* Placeholder Grid */}
-        <View style={styles.placeholderGrid}>
-          <View style={styles.placeholderBox} />
-          <View style={styles.placeholderBox} />
-          <View style={styles.placeholderBox} />
-          <View style={styles.placeholderBox} />
-          <View style={styles.placeholderBox} />
-        </View>
-      </ScrollView>
+      {/* Image Grid using FlatList */}
+      <FlatList
+        data={images}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
+        numColumns={3} // Set number of columns to 3 for grid layout
+        columnWrapperStyle={styles.columnWrapper} // Style for the column wrapper
+        style={styles.imageGrid} // Style for the FlatList
+      />
+
+      {/* Footer at the Bottom */}
       <Footer navigation={navigation} />
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#000', // Set background to black
+    backgroundColor: '#ffffff',
   },
   loader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+  },
+  profileImageContainer: {
+    position: 'relative',
+    borderRadius: 50,
+    padding: 5,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     borderWidth: 2,
-    borderColor: '#4CAF50', // Green border for profile image
+    borderColor: '#4CAF50',
+  },
+  addPhotoButton: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    backgroundColor: '#ffffff',
+    borderRadius: 50,
+    padding: 2,
+    elevation: 2,
   },
   profileDetails: {
-    marginLeft: 16,
+    marginLeft: 12,
   },
   fullName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff', // White text for full name
+    color: '#000',
   },
   username: {
-    fontSize: 16,
-    color: '#ccc', // Light gray text for username
+    fontSize: 14,
+    color: '#777',
+    marginTop: 2,
   },
   mobileNumber: {
-    fontSize: 14,
-    color: '#999', // Gray text for mobile number
+    fontSize: 12,
+    color: '#555',
+    marginTop: 2,
+  },
+  settingsButton: {
+    padding: 8,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    paddingVertical: 12,
+    marginTop: 8,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    elevation: 2,
   },
-  statBox: {
+  statCard: {
     alignItems: 'center',
+    flex: 1,
   },
   statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  statValueTime: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff', // White text for stats
+    color: '#4CAF50',
+    marginTop: 4,
   },
   statLabel: {
-    fontSize: 14,
-    color: '#ccc', // Light gray text for stat labels
-  },
-  workoutContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  workoutLabel: {
-    fontSize: 16,
-    color: '#fff', // White text for workout label
-  },
-  workoutTime: {
-    fontSize: 18,
-    color: '#4CAF50', // Green text for workout time
-    fontWeight: 'bold',
+    fontSize: 15,
+    color: '#777',
+    marginTop: 2,
   },
   progressBar: {
-    width: '100%',
+    width: '90%',
     height: 10,
     borderRadius: 5,
-    marginTop: 8,
-    backgroundColor: '#555', // Dark background for progress bar
+    marginTop: 4,
+    backgroundColor: '#e0e0e0',
   },
-  buttonsContainer: {
+  buttonsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    padding: 12,
   },
   button: {
-    flex: 1,
-    backgroundColor: '#333', // Dark button background
-    borderRadius: 8,
-    padding: 16,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    justifyContent: 'center',
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginHorizontal: 5,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff', // White text for button text
-    marginTop: 8,
+    color: '#fff',
+    marginLeft: 8,
   },
-  showAllText: {
-    fontSize: 14,
-    color: '#4CAF50', // Green text for "Show all"
-    marginTop: 8,
+  addButton: {
+    backgroundColor: '#4CAF50',
+    padding: 8,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  placeholderGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  imageGrid: {
+    flex: 1,
+    padding: 12,
+  },
+  gridItem: {
+    flex: 1,
+    margin: 5,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#f0f0f0',
+  },
+  gridImage: {
+    width: '100%',
+    height: 100,
+    borderRadius: 10,
+  },
+  columnWrapper: {
     justifyContent: 'space-between',
-  },
-  placeholderBox: {
-    width: '48%',
-    height: 120,
-    backgroundColor: '#555', // Dark gray placeholder box
-    borderRadius: 8,
-    marginBottom: 16,
   },
 });
 

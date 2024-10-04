@@ -192,7 +192,6 @@ const GymDetailScreen = ({ navigation, route }) => {
   );
 };
 
-const { width, height } = Dimensions.get('window'); // Use screen dimensions for responsive design
 
 const styles = StyleSheet.create({
   container: {
@@ -205,11 +204,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 100, // Space for the button
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   headerContainer: {
     marginBottom: 20,
@@ -236,12 +230,6 @@ const styles = StyleSheet.create({
   },
   activeDot: {
     backgroundColor: '#4CAF50',
-  },
-  welcomeText: {
-    color: '#000',
-    fontSize: 22,
-    fontWeight: '600',
-    marginBottom: 5,
   },
   userName: {
     color: '#000',
@@ -270,11 +258,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 10,
   },
-  city: {
-    fontSize: 16,
-  },
-  state: {
-    fontSize: 16,
+  price: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   amenitiesTitle: {
     fontSize: 20,
@@ -285,62 +271,56 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
-  amenityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  amenity: {
+    fontSize: 16, // Increased font size
+    color: '#4CAF50', // Green color for amenities
     marginBottom: 10,
-    width: '50%', // Two items per row
-  },
-  icon: {
-    marginRight: 10,
-  },
-  amenityText: {
-    fontSize: 16,
-  },
-  noAmenitiesText: {
-    fontSize: 16,
-    color: '#999',
+    marginRight: 15,
+    fontWeight: '500', // Semi-bold for better emphasis
   },
   showAllText: {
-    color: '#4CAF50',
-    marginBottom: 20,
+    color: '#1E90FF', // Brighter blue color to stand out
+    fontSize: 18, // Slightly larger font size
+    fontWeight: 'bold', // Make it bold
     textAlign: 'center',
+    marginVertical: 20,
+    textDecorationLine: 'underline', // Underline for emphasis
+    letterSpacing: 1.5, // Add spacing between letters
+    fontFamily: 'Cochin', // Use a more elegant font (iOS) or set a custom one
+  
   },
   bottomSpacing: {
     height: 100, // Space for the button
   },
   button: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 20, // Reduced bottom value to move the button up
+    left: 20,
+    right: 20,
     backgroundColor: '#4CAF50',
-    paddingVertical: 15,
-    alignItems: 'center',
     borderRadius: 10,
-    marginHorizontal: 20,
-    elevation: 5,
+    padding: 15,
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
+    textAlign: 'center',
     fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   modalImage: {
-    width: '100%',
-    height: '80%',
+    width: '90%',
+    height: '90%',
   },
   closeButton: {
     position: 'absolute',
     top: 40,
     right: 20,
-    zIndex: 1,
   },
   closeButtonText: {
     color: '#fff',
@@ -348,8 +328,9 @@ const styles = StyleSheet.create({
   },
   slotSelectionModal: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    padding: 20,
   },
 });
 
