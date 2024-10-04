@@ -21,6 +21,23 @@ export const loginUser = async (phoneNumber) => {
 };
 
 
+
+export const registerUser = async (fullName, phoneNumber) => {
+  try {
+    console.log(`${BASE_URL}/auth/login`);
+    const response = await axios.post(`${BASE_URL}/auth/register`, {
+      full_name: fullName,
+      mobile_number: phoneNumber
+    });
+    console.log("Response Data", response.data);
+    return response.data; // Return the data on success
+  } catch (error) {
+    console.error('API call error:', error);
+    throw error; // Rethrow the error for handling in the calling function
+  }
+};
+
+
 // Function to handle OTP verification
 export const verifyOtp = async (mobileNumber, otp) => {
     try {

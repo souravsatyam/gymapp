@@ -1,9 +1,29 @@
 // screens/RegisterScreen.js
-
-import React from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import { registerUser } from '../api/apiService'; // Import the registerUser function
 
 const RegisterScreen = ({ navigation }) => {
+  const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+  const handleRegister = async () => {
+    if (!fullName || !phoneNumber) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    
+    try {
+      const response = await registerUser(fullName, phoneNumber);
+      console.log("Registration Success:", response);
+      // Navigate to OTP screen with phoneNumber
+      navigation.navigate('OTPVerification', { mobileNumber: phoneNumber });
+    } catch (error) {
+      console.error('Registration failed:', error);
+      Alert.alert('Registration Error', 'Something went wrong during registration. Please try again.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Logo Image */}
@@ -19,6 +39,8 @@ const RegisterScreen = ({ navigation }) => {
         style={styles.input}
         placeholder="Full Name"
         placeholderTextColor="#fff" // White placeholder for better visibility
+        value={fullName}
+        onChangeText={setFullName} // Update fullName state
       />
       <TextInput
         style={styles.input}
@@ -26,9 +48,11 @@ const RegisterScreen = ({ navigation }) => {
         keyboardType="phone-pad"
         maxLength={10} // Assuming a 10-digit mobile number
         placeholderTextColor="#fff" // White placeholder for better visibility
+        value={phoneNumber}
+        onChangeText={setPhoneNumber} // Update phoneNumber state
       />
 
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
 
