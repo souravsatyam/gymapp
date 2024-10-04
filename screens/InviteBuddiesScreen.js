@@ -10,15 +10,18 @@ const InviteBuddiesScreen = ({ navigation }) => {
   const [buddyList, setBuddyList] = useState([]);
 
   // Fetch nearby users from the API
+
+  const fetchNearbyUsers = async () => {
+    try {
+      const data = await fetchAllNearByUser();
+      setBuddyList(data);
+    } catch (error) {
+      console.error('Error fetching nearby users:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchNearbyUsers = async () => {
-      try {
-        const data = await fetchAllNearByUser();
-        setBuddyList(data);
-      } catch (error) {
-        console.error('Error fetching nearby users:', error);
-      }
-    };
+    
 
     fetchNearbyUsers();
   }, []);
@@ -30,13 +33,8 @@ const InviteBuddiesScreen = ({ navigation }) => {
       console.log('Friend request sent:', response);
 
       // Update the invited status in the UI
-      const updatedBuddies = buddyList.map((buddy) => {
-        if (buddy.id === id) {
-          return { ...buddy, invited: true };
-        }
-        return buddy;
-      });
-      setBuddyList(updatedBuddies);
+      
+      fetchNearbyUsers();
     } catch (error) {
       console.error('Error inviting friend:', error);
     }
@@ -52,15 +50,24 @@ const InviteBuddiesScreen = ({ navigation }) => {
           {item.status}
         </Text>
       </View>
-      {item.invited ? (
+      {(item?.invited?.sent && item?.invited?.accepted)  && (
+        <TouchableOpacity style={styles.invitedButton}>
+          <Text style={styles.invitedButtonText}>Friends</Text>
+        </TouchableOpacity>
+      )}
+      
+      {(item?.invited?.sent && !item?.invited?.accepted)  && (
         <TouchableOpacity style={styles.invitedButton}>
           <Text style={styles.invitedButtonText}>Invited</Text>
         </TouchableOpacity>
-      ) : (
+      )}
+      
+      {(!item?.invited?.sent && !item?.invited?.accepted)  && (
         <TouchableOpacity style={styles.inviteButton} onPress={() => handleInvite(item.id)}>
-          <Text style={styles.inviteButtonText}>Add Friend</Text>
+          <Text style={styles.invitedButtonText}>Add Friend</Text>
         </TouchableOpacity>
       )}
+      
     </View>
   );
 
