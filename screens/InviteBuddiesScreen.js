@@ -1,22 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Footer from '../components/Footer';
+import { fetchAllNearByUser } from '../api/apiService';
 
-const buddies = [
-  { id: 1, name: 'Melvin', status: 'Available', image: 'https://via.placeholder.com/50', inGym: false, invited: false },
-  { id: 2, name: 'Melvin', status: 'In gym', image: 'https://via.placeholder.com/50', inGym: true, invited: true },
-  { id: 3, name: 'Melvin', status: 'Available', image: 'https://via.placeholder.com/50', inGym: false, invited: false },
-  { id: 4, name: 'Melvin', status: 'In gym', image: 'https://via.placeholder.com/50', inGym: true, invited: false },
-  { id: 5, name: 'Melvin', status: 'Available', image: 'https://via.placeholder.com/50', inGym: false, invited: true },
-  { id: 6, name: 'Melvin', status: 'Available', image: 'https://via.placeholder.com/50', inGym: false, invited: false },
-  { id: 7, name: 'Melvin', status: 'Available', image: 'https://via.placeholder.com/50', inGym: false, invited: false },
-];
-
-const InviteBuddiesScreen = ({navigation}) => {
+const InviteBuddiesScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
-  const [buddyList, setBuddyList] = useState(buddies);
+  const [buddyList, setBuddyList] = useState([]);
+  
+  // Fetch nearby users from the API
+  useEffect(() => {
+    const fetchNearbyUsers = async () => {
+      try {
+   
+        const data = await fetchAllNearByUser();
+        setBuddyList(data);
+      } catch (error) {
+        console.error('Error fetching nearby users:', error);
+      }
+    };
 
+    fetchNearbyUsers();
+  }, []);
+
+  // Handle inviting a buddy
   const handleInvite = (id) => {
     const updatedBuddies = buddyList.map((buddy) => {
       if (buddy.id === id) {
@@ -27,12 +34,13 @@ const InviteBuddiesScreen = ({navigation}) => {
     setBuddyList(updatedBuddies);
   };
 
+  // Render a buddy
   const renderBuddy = ({ item }) => (
     <View style={styles.buddyItem}>
       <Image source={{ uri: item.image }} style={styles.buddyImage} />
       <View style={styles.buddyInfo}>
         <Text style={styles.buddyName}>{item.name}</Text>
-        <Text style={[styles.buddyStatus, { color: item.inGym ? 'red' : 'green' }]}>
+        <Text style={[styles.buddyStatus, { color: item.inGym ? 'green' : 'red' }]}>
           {item.status}
         </Text>
       </View>
@@ -42,7 +50,7 @@ const InviteBuddiesScreen = ({navigation}) => {
         </TouchableOpacity>
       ) : (
         <TouchableOpacity style={styles.inviteButton} onPress={() => handleInvite(item.id)}>
-          <Text style={styles.inviteButtonText}>Invite</Text>
+          <Text style={styles.inviteButtonText}>Add Friend</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -54,7 +62,7 @@ const InviteBuddiesScreen = ({navigation}) => {
       <View style={styles.header}>
         <Text><Icon name="dumbbell" size={40} color="#fff" /></Text>
         <View>
-          <Text style={styles.headerTitle}>Invite your buddies</Text>
+          <Text style={styles.headerTitle}>Add your friends and Invite as buddy</Text>
           <Text style={styles.headerSubtitle}>Team up with friends for a better workout!</Text>
         </View>
       </View>
@@ -64,7 +72,7 @@ const InviteBuddiesScreen = ({navigation}) => {
         <Text><Icon name="magnify" size={24} color="#888" /></Text>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search buddies"
+          placeholder="Search Friend"
           placeholderTextColor="#888"
           value={searchText}
           onChangeText={(text) => setSearchText(text)}
@@ -73,7 +81,7 @@ const InviteBuddiesScreen = ({navigation}) => {
 
       {/* Buddy List */}
       <FlatList
-        data={buddyList}
+        data={buddyList.filter((buddy) => buddy.name.toLowerCase().includes(searchText.toLowerCase()))}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderBuddy}
         contentContainerStyle={styles.buddyList}

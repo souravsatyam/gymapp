@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     color: '#333', // Darker text for better readability
     marginBottom: 20,
     textAlign: 'center',
-    fontFamily: 'Arial', // Set to a standard font for uniformity
+    fontFamily: 'Roboto', // Set to a standard font for uniformity
   },
   button: {
     flexDirection: 'row',
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
     marginLeft: 1, // Spacing between icon and text
-    fontFamily: 'Arial', // Set to a standard font for uniformity
+    fontFamily: 'Roboto', // Set to a standard font for uniformity
     flex: 1,
   },
   icon: {

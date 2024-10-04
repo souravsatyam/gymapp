@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#2e7d32', // Dark green text
     marginBottom: 20,
-    fontFamily: 'Georgia', // Stylish font
+    fontFamily: 'Roboto', // Stylish font
   },
   detailsContainer: {
     backgroundColor: '#fff',
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#333',
     marginLeft: 10,
-    fontFamily: 'Georgia', // Stylish font
+    fontFamily: 'Roboto', // Stylish font
   },
   price: {
     fontSize: 20,

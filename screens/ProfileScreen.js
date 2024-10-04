@@ -1,65 +1,102 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { ProgressBar } from 'react-native-paper'; // Ensure react-native-paper is installed
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Import icons from react-native-vector-icons
 import Footer from '../components/Footer';
+import { userDetails } from '../api/apiService';
 
-const ProfileScreen = ({navigation}) => {
+const ProfileScreen = ({ navigation }) => {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch user data from the API
+    const fetchUserData = async () => {
+      try {
+      
+        const data = await userDetails();
+        setUserData(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#4CAF50" />
+      </View>
+    );
+  }
+
   return (
-
     <>
-    <ScrollView style={styles.container}>
-      {/* Profile Header */}
-      <View style={styles.profileHeader}>
-        <Image
-          source={{ uri: 'https://via.placeholder.com/150' }} // Placeholder image URL
-          style={styles.profileImage}
-        />
-        <View style={styles.statsContainer}>
-          <Text style={styles.statValue}>120</Text>
-          <Text style={styles.statLabel}>Posts</Text>
+      <ScrollView style={styles.container}>
+        {/* Profile Header */}
+        <View style={styles.profileHeader}>
+          <Image
+            source={{ uri: userData?.profile_pic || 'https://via.placeholder.com/150' }} // Placeholder image if profile_pic is null
+            style={styles.profileImage}
+          />
+          <View style={styles.profileDetails}>
+            <Text style={styles.fullName}>{userData?.full_name || 'N/A'}</Text>
+            <Text style={styles.username}>@{userData?.username || 'N/A'}</Text>
+            <Text style={styles.mobileNumber}>{userData?.mobile_number || 'N/A'}</Text>
+          </View>
         </View>
-        <View style={styles.statsContainer}>
-          <Text style={styles.statValue}>20.9K</Text>
-          <Text style={styles.statLabel}>Followers</Text>
-        </View>
-        <View style={styles.statsContainer}>
-          <Text style={styles.statValue}>150</Text>
-          <Text style={styles.statLabel}>Following</Text>
-        </View>
-      </View>
 
-      {/* Workout Time */}
-      <View style={styles.workoutContainer}>
-        <Text style={styles.workoutLabel}>Workout Time</Text>
-        <Text style={styles.workoutTime}>120 h.</Text>
-        <ProgressBar progress={0.75} color="#4CAF50" style={styles.progressBar} />
-      </View>
+        {/* Stats */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{userData?.upload_count || 0}</Text>
+            <Text style={styles.statLabel}>Posts</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{userData?.followers_count || 0}</Text>
+            <Text style={styles.statLabel}>Friends</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{userData?.following_count || 0}</Text>
+            <Text style={styles.statLabel}>Buddies</Text>
+          </View>
+        </View>
 
-      {/* Buttons with Icons */}
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity style={styles.button}>
-          <Text><Icon name="dumbbell" size={24} color="#fff" /></Text> 
-          <Text style={styles.buttonText}>Visited Gyms</Text>
-          <Text style={styles.showAllText}>Show all</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-            <Text><Icon name="account-group" size={24} color="#fff" /></Text>
+        {/* Workout Time */}
+        <View style={styles.workoutContainer}>
+          <Text style={styles.workoutLabel}>Workout Time</Text>
+          <Text style={styles.workoutTime}>{userData?.total_work_out_time || 0} h.</Text>
+          <ProgressBar progress={0.75} color="#4CAF50" style={styles.progressBar} />
+        </View>
+
+        {/* Buttons with Icons */}
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.button}>
+            <Icon name="dumbbell" size={24} color="#fff" />
+            <Text style={styles.buttonText}>Visited Gyms</Text>
+            <Text style={styles.showAllText}>Show all</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+            <Icon name="account-group" size={24} color="#fff" />
             <Text style={styles.buttonText}>Gym Buddies</Text>
-          <Text style={styles.showAllText}>Show all</Text>
-        </TouchableOpacity>
-      </View>
+            <Text style={styles.showAllText}>Show all</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Placeholder Grid */}
-      <View style={styles.placeholderGrid}>
-        <View style={styles.placeholderBox} />
-        <View style={styles.placeholderBox} />
-        <View style={styles.placeholderBox} />
-        <View style={styles.placeholderBox} />
-        <View style={styles.placeholderBox} />
-      </View>
-    </ScrollView>
-        <Footer navigation={navigation} />
+        {/* Placeholder Grid */}
+        <View style={styles.placeholderGrid}>
+          <View style={styles.placeholderBox} />
+          <View style={styles.placeholderBox} />
+          <View style={styles.placeholderBox} />
+          <View style={styles.placeholderBox} />
+          <View style={styles.placeholderBox} />
+        </View>
+      </ScrollView>
+      <Footer navigation={navigation} />
     </>
   );
 };
@@ -70,9 +107,13 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#000', // Set background to black
   },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   profileHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
@@ -83,7 +124,28 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#4CAF50', // Green border for profile image
   },
+  profileDetails: {
+    marginLeft: 16,
+  },
+  fullName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff', // White text for full name
+  },
+  username: {
+    fontSize: 16,
+    color: '#ccc', // Light gray text for username
+  },
+  mobileNumber: {
+    fontSize: 14,
+    color: '#999', // Gray text for mobile number
+  },
   statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  statBox: {
     alignItems: 'center',
   },
   statValue: {

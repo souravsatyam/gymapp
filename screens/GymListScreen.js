@@ -1,54 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome for notification icon
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons'; // For the location icon
+import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import axios from 'axios'; // Import axios for API calls
 import Footer from '../components/Footer';
+import { fetchAllGyms } from '../api/apiService';
+
 
 export default function GymListScreen({ navigation }) {
-  const [searchText, setSearchText] = useState(''); // State to track search input
-  const [gyms, setGyms] = useState([
-    {
-      id: '1',
-      name: 'Fitness Gym Pro',
-      description: 'High-quality equipment and trainers available.',
-      rating: 4.5,
-      price: 288,
-      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww',
-    },
-    {
-      id: '2',
-      name: 'Superfit Gym',
-      description: '24/7 availability and best workout environment.',
-      rating: 4.7,
-      price: 288,
-      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww',
-    },
-    {
-      id: '3',
-      name: 'Power House Gym',
-      description: 'Affordable pricing and great community.',
-      rating: 4.2,
-      price: 288,
-      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww',
-    },
-  ]);
+  const [searchText, setSearchText] = useState('');
+  const [gyms, setGyms] = useState([]);
+
+  // Function to fetch gyms based on latitude and longitude
+  const fetchGyms = async () => {
+    try {
+      const latitude = 12.9716; // Replace with actual latitude
+      const longitude = 77.5946; // Replace with actual longitude
+      
+      const gymList = await fetchAllGyms();
+      setGyms(gymList);
+     
+    } catch (error) {
+      console.error('Error fetching gyms:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchGyms(); // Call the API when the component mounts
+  }, []);
 
   // Filter gyms based on search input
-  const filteredGyms = gyms.filter(gym =>
-    gym.name.toLowerCase().includes(searchText.toLowerCase())
+  const filteredGyms = gyms?.filter(gym =>
+    gym.gymName.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  const redirectToGymDetails = (gymId) => {
+ 
+    navigation.navigate('GymDetails', { gym_id: gymId })
+  }
+
+  // Render each gym
   const renderGym = ({ item }) => (
-    <TouchableOpacity style={styles.gymCard} onPress={() => navigation.navigate('GymDetails', { gymId: item.id })}>
-      <Image source={{ uri: item.image }} style={styles.gymImage} />
+    <TouchableOpacity style={styles.gymCard} onPress={() => redirectToGymDetails(item.gymId)}>
+      <Image source={{ uri: item.images?.[0]?.imageUrl || 'https://via.placeholder.com/150' }} style={styles.gymImage} />
       <View style={styles.gymInfo}>
-        <Text style={styles.gymName}>{item.name}</Text>
-        <Text style={styles.gymPrice}>₹ {item.price}/session</Text>
-        <Text style={styles.gymRating}>⭐ {item.rating}</Text>
-        <TouchableOpacity 
-          style={styles.bookNowButton} 
-          onPress={() => navigation.navigate('GymDetails', { gymId: item.id })} // Navigate to GymDetails
-        >
+        <Text style={styles.gymName}>{item.gymName}</Text>
+        <Text style={styles.gymPrice}>₹ {item.subscriptionPrices?.[0] || 'N/A'}/session</Text>
+        <Text style={styles.gymRating}>⭐ {item.gymRating || 'N/A'}</Text>
+        <TouchableOpacity style={styles.bookNowButton} onPress={() => navigation.navigate('GymDetails', { gym_id: item.gymId })}>
           <Text style={styles.bookNowText}>Book Now</Text>
         </TouchableOpacity>
       </View>
@@ -67,7 +66,7 @@ export default function GymListScreen({ navigation }) {
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('NotificationListScreen')}>
             <Text>
-              <Icon name="bell" size={24} color="green" /> {/* Changed notification icon color to green */}
+              <Icon name="bell" size={24} color="green" />
             </Text>
           </TouchableOpacity>
         </View>
@@ -75,16 +74,16 @@ export default function GymListScreen({ navigation }) {
         <TextInput
           style={styles.searchInput}
           placeholder="Search gyms or friends"
-          placeholderTextColor="#666" // Light gray placeholder text
+          placeholderTextColor="#666"
           value={searchText}
-          onChangeText={setSearchText} // Updates the search text state
+          onChangeText={setSearchText}
         />
       </View>
 
       {/* Display filtered gyms */}
       <FlatList
         data={filteredGyms}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.gymId}
         renderItem={renderGym}
         contentContainerStyle={styles.gymList}
       />

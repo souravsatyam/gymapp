@@ -9,26 +9,26 @@ export default function OTPVerificationScreen({ route, navigation }) {
 
   const handleVerifyOtp = async () => {
     navigation.navigate('GymList');
-    // if (!otp) {
-    //   Alert.alert('Error', 'Please enter the OTP.');
-    //   return;
-    // }
+    if (!otp) {
+      Alert.alert('Error', 'Please enter the OTP.');
+      return;
+    }
 
-    // try {
-    //   const data = await verifyOtp(mobileNumber, otp); // Call the API to verify OTP
+    try {
+      const data = await verifyOtp(mobileNumber, otp); // Call the API to verify OTP
 
-    //   if (data.status) { // If verification is successful, store the token
-    //     await AsyncStorage.setItem('authToken', data.token); // Store token in AsyncStorage
-    //     Alert.alert('Success', 'OTP verified successfully!');
-    //     // Navigate to the Register screen or Home screen
-    //     navigation.navigate('GymList');
-    //   } else {
-    //     Alert.alert('OTP Verification Failed', data.message || 'The OTP verification failed. Please try again.');
-    //   }
-    // } catch (error) {
-    //   console.error('OTP Verification Error:', error);
-    //   Alert.alert('Error', 'Something went wrong. Please try again later.');
-    // }
+      if (data.status) { // If verification is successful, store the token
+        await AsyncStorage.setItem('authToken', data.token); // Store token in AsyncStorage
+        Alert.alert('Success', 'OTP verified successfully!');
+        // Navigate to the Register screen or Home screen
+        navigation.navigate('GymList');
+      } else {
+        Alert.alert('OTP Verification Failed', data.message || 'The OTP verification failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('OTP Verification Error:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again later.');
+    }
   };
 
   return (
