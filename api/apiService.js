@@ -3,7 +3,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://f590-223-231-136-59.ngrok-free.app/user/api'; // Change to HTTP for testing
+const BASE_URL = 'https://8249-2401-4900-3761-f128-353f-4175-6ac4-6aa8.ngrok-free.app/user/api'; // Change to HTTP for testing
 
 // Function to handle login
 export const loginUser = async (phoneNumber) => {
@@ -11,6 +11,23 @@ export const loginUser = async (phoneNumber) => {
     console.log(`${BASE_URL}/auth/login`);
     const response = await axios.post(`${BASE_URL}/auth/login`, {
       identifier: phoneNumber,
+    });
+    console.log("Response Data", response.data);
+    return response.data; // Return the data on success
+  } catch (error) {
+    console.error('API call error:', error);
+    throw error; // Rethrow the error for handling in the calling function
+  }
+};
+
+
+
+export const registerUser = async (fullName, phoneNumber) => {
+  try {
+    console.log(`${BASE_URL}/auth/login`);
+    const response = await axios.post(`${BASE_URL}/auth/register`, {
+      full_name: fullName,
+      mobile_number: phoneNumber
     });
     console.log("Response Data", response.data);
     return response.data; // Return the data on success
@@ -80,23 +97,27 @@ export const verifyOtp = async (mobileNumber, otp) => {
   };
 
 
-  export const fetchAllNearByUser = async () => {
+  export const fetchAllNearByUser = async (searchText = '') => {
     try {
       const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
-      const response = await fetch(`${BASE_URL}/users/nearby-users?lat=12.9716&long=77.5946`, {
+      const endpoint = searchText
+      ? `${BASE_URL}/users/search/${searchText}`
+      : `${BASE_URL}/users/nearby-users?lat=12.9716&long=77.5946`;
+      const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${userToken}`, // Include the bearer token
         },
       });
       const data = await response.json();
+      console.log()
       const formattedBuddies = data.map(user => ({
-        id: user.User.id,
-        name: user.User.full_name,
+        id: user.id,
+        name: user.full_name,
         status: user.is_selected ? 'Available' : 'Unavailable',
-        image: user.User.profile_pic || 'https://via.placeholder.com/50', // Use a placeholder if no image
+        image: user.profile_pic || 'https://via.placeholder.com/50', // Use a placeholder if no image
         inGym: user.is_selected,
-        invited: false,
+        invited: user.friendRequestStatus,
       }));
       return formattedBuddies;
     } catch (error) {
@@ -115,6 +136,7 @@ export const verifyOtp = async (mobileNumber, otp) => {
       });
     
       const data = await response.json();
+      console.log("Data received", data);
       return data.loggedInUser;
     
     } catch (error) {
@@ -122,3 +144,24 @@ export const verifyOtp = async (mobileNumber, otp) => {
      
     }
   }
+
+
+
+  export const addFriend = async (userId) => {
+    try {
+      const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+      const response = await axios.post(
+        `${BASE_URL}/friends/add`,
+        { userId: userId },
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,  // Add the Bearer token here
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      throw error;
+    }
+  };

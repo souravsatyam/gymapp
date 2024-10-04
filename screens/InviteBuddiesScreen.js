@@ -3,35 +3,41 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, FlatList } 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Footer from '../components/Footer';
 import { fetchAllNearByUser } from '../api/apiService';
+import { addFriend } from '../api/apiService'; // Import the addFriend function
 
 const InviteBuddiesScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [buddyList, setBuddyList] = useState([]);
-  
+
   // Fetch nearby users from the API
+
+  const fetchNearbyUsers = async () => {
+    try {
+      const data = await fetchAllNearByUser();
+      setBuddyList(data);
+    } catch (error) {
+      console.error('Error fetching nearby users:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchNearbyUsers = async () => {
-      try {
-   
-        const data = await fetchAllNearByUser();
-        setBuddyList(data);
-      } catch (error) {
-        console.error('Error fetching nearby users:', error);
-      }
-    };
+    
 
     fetchNearbyUsers();
   }, []);
 
   // Handle inviting a buddy
-  const handleInvite = (id) => {
-    const updatedBuddies = buddyList.map((buddy) => {
-      if (buddy.id === id) {
-        return { ...buddy, invited: true };
-      }
-      return buddy;
-    });
-    setBuddyList(updatedBuddies);
+  const handleInvite = async (id) => {
+    try {
+      const response = await addFriend(id); // Call the API to send a friend request
+      console.log('Friend request sent:', response);
+
+      // Update the invited status in the UI
+      
+      fetchNearbyUsers();
+    } catch (error) {
+      console.error('Error inviting friend:', error);
+    }
   };
 
   // Render a buddy
@@ -44,15 +50,24 @@ const InviteBuddiesScreen = ({ navigation }) => {
           {item.status}
         </Text>
       </View>
-      {item.invited ? (
+      {(item?.invited?.sent && item?.invited?.accepted)  && (
+        <TouchableOpacity style={styles.invitedButton}>
+          <Text style={styles.invitedButtonText}>Friends</Text>
+        </TouchableOpacity>
+      )}
+      
+      {(item?.invited?.sent && !item?.invited?.accepted)  && (
         <TouchableOpacity style={styles.invitedButton}>
           <Text style={styles.invitedButtonText}>Invited</Text>
         </TouchableOpacity>
-      ) : (
+      )}
+      
+      {(!item?.invited?.sent && !item?.invited?.accepted)  && (
         <TouchableOpacity style={styles.inviteButton} onPress={() => handleInvite(item.id)}>
-          <Text style={styles.inviteButtonText}>Add Friend</Text>
+          <Text style={styles.invitedButtonText}>Add Friend</Text>
         </TouchableOpacity>
       )}
+      
     </View>
   );
 

@@ -8,7 +8,7 @@ const ConfirmationScreen = ({ route }) => {
     <View style={styles.container}>
       <View style={styles.imageContainer}>
         <ImageBackground
-          source={{ uri: 'https://www.istockphoto.com/photo/isometric-view-of-sport-equipment-like-kettlebell-dumbbell-and-barbell-on-violet-gm1370649838-440153242?searchscope=image%2Cfilm' }}
+          source={require('../assets/equipment.jpg')}
           style={styles.backgroundImage}
         >
           <View style={styles.overlay} />
@@ -27,7 +27,7 @@ const ConfirmationScreen = ({ route }) => {
         </View>
 
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Got it</Text>
+          <Text style={styles.buttonText}>Invite friends</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -39,7 +39,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   imageContainer: {
-    flex: 0.6, // 60% for the image
+    flex: 0.5, // 50% for the image
+    paddingLeft: 20, // Shift the image slightly to the right
   },
   backgroundImage: {
     flex: 1,
@@ -52,10 +53,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Light overlay for text readability
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Lighter overlay for better visibility
   },
   textContainer: {
-    flex: 0.4, // 40% for the text
+    flex: 0.5, // 50% for the text
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
