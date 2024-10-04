@@ -8,33 +8,34 @@ const LoginScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const handleLogin = async () => {
-    if (!phoneNumber) {
-      Alert.alert('Error', 'Please enter your phone number.');
-      return;
-    }
+    navigation.navigate('OTPVerification', { mobileNumber: phoneNumber });
+    // if (!phoneNumber) {
+    //   Alert.alert('Error', 'Please enter your phone number.');
+    //   return;
+    // }
 
-    try {
-      const data = await loginUser(phoneNumber); // Call the API service
+    // try {
+    //   const data = await loginUser(phoneNumber); // Call the API service
 
-      // Navigate to OTP screen on successful login
-      navigation.navigate('OTPVerification', { mobileNumber: phoneNumber });
-    } catch (error) {
-      // Show error message if login failed
-      console.error(error);
-      Alert.alert('Login Failed', error.message);
-    }
+    //   // Navigate to OTP screen on successful login
+    //   navigation.navigate('OTPVerification', { mobileNumber: phoneNumber });
+    // } catch (error) {
+    //   // Show error message if login failed
+    //   console.error(error);
+    //   Alert.alert('Login Failed', error.message);
+    // }
   };
 
   return (
     <View style={styles.container}>
       {/* Logo Image */}
-      <Image
+      {/* <Image
         source={{ uri: 'https://d250w8f359rhg6.cloudfront.net/static/media/logo-removebg-preview.783e77ab47a976cb321a.png' }} // Replace with your logo URL
         style={styles.logo}
         resizeMode="contain"
-      />
+      /> */}
 
-      <Text style={styles.title}>Welcome back! Glad to see you, Again!</Text>
+      <Text style={styles.title}>Welcome back! Glad to see you, Agains!</Text>
       <Text style={styles.subtitle}>Book Your Workout Anytime, Anywhere</Text>
 
       <TextInput
