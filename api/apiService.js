@@ -3,7 +3,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://f590-223-231-136-59.ngrok-free.app/user/api'; // Change to HTTP for testing
+const BASE_URL = 'https://adff-2401-4900-6198-20ae-b4cd-8a36-2dfe-72b2.ngrok-free.app/user/api'; // Change to HTTP for testing
 
 // Function to handle login
 export const loginUser = async (phoneNumber) => {

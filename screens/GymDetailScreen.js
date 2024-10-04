@@ -185,7 +185,7 @@ const GymDetailScreen = ({ navigation, route }) => {
             <Text style={styles.closeButtonText}>✖️</Text>
           </TouchableOpacity>
           {/* Render slot selection screen */}
-          <SlotSelectionScreen navigation={navigation} />
+          <SlotSelectionScreen navigation={navigation} gym={gymData}/>
         </View>
       </Modal>
     </View>

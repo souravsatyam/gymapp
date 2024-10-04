@@ -1,13 +1,35 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ImageBackground } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import RazorpayCheckout from 'react-native-razorpay';
 
 const PaymentScreen = ({ route, navigation }) => {
   const { slotDetails } = route.params; // Extract slot details from navigation parameters
+  
 
   const handlePayment = () => {
-    Alert.alert("Payment processed!");
-    // Add further payment processing logic here
+    
+    var options = {
+      description: 'Credits towards consultation',
+      image: 'https://i.imgur.com/3g7nmJC.png',
+      currency: 'INR',
+      key: 'QaunL5f3pREFgj4wZXgruC57', // Your api key
+      amount: slotDetails.price * (slotDetails.duration/60), // Amount in paisa (50000 paisa = ₹500),
+      name: 'foo',
+      prefill: {
+        email: 'void@razorpay.com',
+        contact: '9191919191',
+        name: 'Razorpay Software'
+      },
+      theme: {color: '#F37254'}
+    }
+    RazorpayCheckout.open(options).then((data) => {
+      // handle success
+      Alert.alert(`Success: Payment ID: ${data.razorpay_payment_id}`);
+    }).catch((error) => {
+      // handle failure
+      Alert.alert(`Error: ${error.code} | ${error.description}`);
+    });
   };
 
   return (
@@ -33,7 +55,7 @@ const PaymentScreen = ({ route, navigation }) => {
         </View>
         <View style={styles.detailRow}>
           <Icon name="attach-money" size={24} color="#2e7d32" />
-          <Text style={styles.price}>Price: ${slotDetails.price}</Text>
+          <Text style={styles.price}>Price: INR {slotDetails.price * (slotDetails.duration/60)}</Text>
         </View>
       </View>
 

@@ -1,31 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/Ionicons'; // Importing Ionicons for icons
 
-const SlotSelectionScreen = ({ navigation }) => {
+const SlotSelectionScreen = ({ navigation, gym }) => {
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState(60); // Default duration
-  const [selectedTime, setSelectedTime] = useState(null); // For storing selected time
+  const [selectedSlot, setSelectedSlot] = useState(null); // For storing selected slot
   const [isTimeDropdownVisible, setIsTimeDropdownVisible] = useState(false); // For showing/hiding time dropdown
 
   const durations = [60, 90, 120, 180];
 
-  const availableTimes = [];
-  const currentDate = new Date();
-
-  // Generate available times in 30-minute intervals for the next 24 hours
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute <= 30; minute += 30) {
-      const time = new Date();
-      time.setHours(hour);
-      time.setMinutes(minute);
-      if (time > currentDate) {
-        availableTimes.push(time);
-      }
-    }
-  }
+  // Extract available slots from gymData
+  const availableSlots = gym.slots;
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -34,18 +22,21 @@ const SlotSelectionScreen = ({ navigation }) => {
   };
 
   const handleConfirm = () => {
-    if (!selectedTime) {
+    if (!selectedSlot) {
       Alert.alert("Please select a time.");
       return;
     }
-
+    console.log("selectedSlot.price", selectedSlot.price);
     // Prepare the slot details to pass to PaymentScreen
     const slotDetails = {
       date: date.toLocaleDateString(),
-      time: selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: selectedSlot.startTime,
       duration: selectedDuration,
-      gymName: 'Your Gym Name', // Replace with actual gym name if needed
-      price: calculatePrice(selectedDuration) // Call a function to calculate price based on duration
+      gymName: gym.name,
+      price: selectedSlot.price,
+      slotId: selectedSlot.id,
+      capacity: selectedSlot.capacity,
+      pricePerSlot: selectedSlot.price,
     };
 
     // Navigate to PaymentScreen with slot details
@@ -54,16 +45,21 @@ const SlotSelectionScreen = ({ navigation }) => {
 
   // Function to calculate price based on selected duration
   const calculatePrice = (duration) => {
-    const pricePerMinute = 1; // Set your price per minute here
-    return duration * pricePerMinute; // Return total price
+    // Assuming price is based on slot's price and duration
+    if (selectedSlot) {
+      const pricePerMinute = selectedSlot.price / selectedSlot.timePeriod; // price per minute based on slot's price and time period
+      return duration * pricePerMinute;
+    }
+    return 0;
   };
 
   const buttonColor = '#28a745'; // Set uniform button color to green
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Select a Slot</Text>
 
+      {/* Date Picker */}
       <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.button, { backgroundColor: buttonColor }]}>
         <Icon name="calendar-outline" size={20} color="#fff" style={styles.icon} />
         <Text style={styles.buttonText}>{`Date: ${date.toLocaleDateString()}`}</Text>
@@ -79,34 +75,40 @@ const SlotSelectionScreen = ({ navigation }) => {
         />
       )}
 
+      {/* Time Selection */}
       <Text style={styles.timeTitle}>Select Available Time:</Text>
       <TouchableOpacity
         onPress={() => setIsTimeDropdownVisible(!isTimeDropdownVisible)}
         style={[styles.button, { backgroundColor: buttonColor }]}>
         <Icon name="time-outline" size={20} color="#fff" style={styles.icon} />
         <Text style={styles.buttonText}>
-          {selectedTime ? selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'}
+          {selectedSlot ? selectedSlot.startTime : 'Select Time'}
         </Text>
       </TouchableOpacity>
 
       {isTimeDropdownVisible && (
         <View style={styles.timeDropdown}>
-          {availableTimes.map((time, index) => (
+          {availableSlots.map((slot) => (
             <TouchableOpacity
-              key={index}
+              key={slot.id}
               onPress={() => {
-                setSelectedTime(time);
+                setSelectedSlot(slot);
                 setIsTimeDropdownVisible(false); // Close dropdown on selection
               }}
               style={styles.timeOption}>
               <Text style={styles.timeOptionText}>
-                {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {slot.startTime}
+              </Text>
+              {/* Optionally, display capacity or price */}
+              <Text style={styles.slotDetailsText}>
+                Capacity: {slot.capacity} | Price: ₹{slot.price}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       )}
 
+      {/* Duration Selection */}
       <Text style={styles.durationTitle}>Select Duration:</Text>
       <View style={styles.durationsContainer}>
         <View style={styles.row}>
@@ -139,16 +141,17 @@ const SlotSelectionScreen = ({ navigation }) => {
 
       <Text style={styles.selectedDuration}>{`Selected Duration: ${selectedDuration} mn`}</Text>
 
+      {/* Confirm Button */}
       <TouchableOpacity onPress={handleConfirm} style={[styles.button, { backgroundColor: buttonColor }]}>
         <Text style={styles.buttonText}>Confirm Slot</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1, // Allow scrolling
     padding: 20,
     backgroundColor: '#ffffff', // Changed background color to white
   },
@@ -171,7 +174,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     textAlign: 'center',
-    marginLeft: 1, // Spacing between icon and text
+    marginLeft: 10, // Spacing between icon and text
     fontFamily: 'Roboto', // Set to a standard font for uniformity
     flex: 1,
   },
@@ -201,6 +204,11 @@ const styles = StyleSheet.create({
   timeOptionText: {
     color: '#333', // Darker text for better visibility
     fontSize: 18,
+  },
+  slotDetailsText: {
+    color: '#666',
+    fontSize: 14,
+    marginTop: 5,
   },
   durationTitle: {
     color: '#333',
