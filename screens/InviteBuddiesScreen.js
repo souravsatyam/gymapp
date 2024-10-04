@@ -3,16 +3,16 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, FlatList } 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Footer from '../components/Footer';
 import { fetchAllNearByUser } from '../api/apiService';
+import { addFriend } from '../api/apiService'; // Import the addFriend function
 
 const InviteBuddiesScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [buddyList, setBuddyList] = useState([]);
-  
+
   // Fetch nearby users from the API
   useEffect(() => {
     const fetchNearbyUsers = async () => {
       try {
-   
         const data = await fetchAllNearByUser();
         setBuddyList(data);
       } catch (error) {
@@ -24,14 +24,22 @@ const InviteBuddiesScreen = ({ navigation }) => {
   }, []);
 
   // Handle inviting a buddy
-  const handleInvite = (id) => {
-    const updatedBuddies = buddyList.map((buddy) => {
-      if (buddy.id === id) {
-        return { ...buddy, invited: true };
-      }
-      return buddy;
-    });
-    setBuddyList(updatedBuddies);
+  const handleInvite = async (id) => {
+    try {
+      const response = await addFriend(id); // Call the API to send a friend request
+      console.log('Friend request sent:', response);
+
+      // Update the invited status in the UI
+      const updatedBuddies = buddyList.map((buddy) => {
+        if (buddy.id === id) {
+          return { ...buddy, invited: true };
+        }
+        return buddy;
+      });
+      setBuddyList(updatedBuddies);
+    } catch (error) {
+      console.error('Error inviting friend:', error);
+    }
   };
 
   // Render a buddy
