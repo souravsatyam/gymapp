@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  Image, 
+  StyleSheet, 
+  TouchableOpacity, 
+  TextInput, 
+  KeyboardAvoidingView, 
+  Platform 
+} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-import axios from 'axios'; // Import axios for API calls
-import Footer from '../components/Footer';
 import { fetchAllGyms } from '../api/apiService';
-
+import Footer from '../components/Footer';
 
 export default function GymListScreen({ navigation }) {
   const [searchText, setSearchText] = useState('');
@@ -14,12 +22,8 @@ export default function GymListScreen({ navigation }) {
   // Function to fetch gyms based on latitude and longitude
   const fetchGyms = async () => {
     try {
-      const latitude = 12.9716; // Replace with actual latitude
-      const longitude = 77.5946; // Replace with actual longitude
-      
       const gymList = await fetchAllGyms();
       setGyms(gymList);
-     
     } catch (error) {
       console.error('Error fetching gyms:', error);
     }
@@ -35,9 +39,8 @@ export default function GymListScreen({ navigation }) {
   );
 
   const redirectToGymDetails = (gymId) => {
- 
-    navigation.navigate('GymDetails', { gym_id: gymId })
-  }
+    navigation.navigate('GymDetails', { gym_id: gymId });
+  };
 
   // Render each gym
   const renderGym = ({ item }) => (
@@ -47,15 +50,15 @@ export default function GymListScreen({ navigation }) {
         <Text style={styles.gymName}>{item.gymName}</Text>
         <Text style={styles.gymPrice}>₹ {item.subscriptionPrices?.[0] || 'N/A'}/session</Text>
         <Text style={styles.gymRating}>⭐ {item.gymRating || 'N/A'}</Text>
-        <TouchableOpacity style={styles.bookNowButton} onPress={() => navigation.navigate('GymDetails', { gym_id: item.gymId })}>
-          <Text style={styles.bookNowText}>Book Now</Text>
-        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       {/* Custom header with greeting and search bar */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
@@ -88,9 +91,10 @@ export default function GymListScreen({ navigation }) {
         contentContainerStyle={styles.gymList}
       />
       <Footer navigation={navigation} />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -152,28 +156,25 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   gymName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 3,
+    fontFamily: 'Roboto',
+    color: '#4CAF50',
+    marginBottom: 5,
+    textAlign: 'left',
   },
   gymPrice: {
-    fontSize: 13,
-    color: '#000',
-    marginBottom: 3,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#e76f51',
+    marginBottom: 5,
+    textAlign: 'left',
   },
   gymRating: {
-    fontSize: 13,
+    fontSize: 10,
     color: 'green',
     marginBottom: 3,
-  },
-  bookNowButton: {
-    backgroundColor: 'green',
-    borderRadius: 5,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    alignSelf: 'center',
-    marginTop: -28,
+    textAlign: 'left',
   },
   bookNowText: {
     color: '#fff',
