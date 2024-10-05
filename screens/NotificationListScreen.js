@@ -54,10 +54,10 @@ const NotificationListScreen = ({ navigation }) => {
           <Text style={styles.username}>{item.user || 'Unknown User'}</Text> 
           {item.others ? `, ${item.others}` : ''} {item.message || 'No message available.'}
         </Text>
-        <Text style={styles.time}>{item.time || 'Time not available.'}</Text>
+        <Text style={styles.time}>{item.createdAt || 'Time not available.'}</Text>
       </View>
       <View style={styles.actionButtons}>
-        {item.type === 'buddyRequest' && (
+        {item.type === 'buddyInvite' && (
           <>
             <TouchableOpacity style={styles.acceptButton}>
               <Text style={styles.buttonText}>Accept</Text>

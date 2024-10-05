@@ -16,6 +16,7 @@ import MyBookings from './screens/MyBookings';
 import SlotSelectionScreen from './screens/SlotSelectionScreen';
 import PaymentScreen from './screens/PaymentConfirm';
 import ConfirmationScreen from './screens/ConfirmationScreen';
+import InviteFriendBuddiesScreen from './screens/InviteFriendsBuddies';
 
 const Stack = createStackNavigator();
 
@@ -38,6 +39,7 @@ export default function App() {
         <Stack.Screen name="MyBookings" component={MyBookings} />
         <Stack.Screen name="SlotSelectionScreen" component={SlotSelectionScreen} />
         <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
+        <Stack.Screen name="InviteFriendBuddy" component={InviteFriendBuddiesScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>

@@ -23,13 +23,12 @@ const MyBookings = () => {
     fetchBookings();
   }, []);
 
-  // Function to handle booking cancellation
   const handleCancelBooking = async (bookingId) => {
     try {
       const response = await cancelBooking(bookingId);
       if (response.success) {
         Alert.alert("Success", "Your booking has been canceled.");
-        setBookings(prevBookings => prevBookings.filter(booking => booking.bookingId !== bookingId)); // Update state
+        setBookings(prevBookings => prevBookings.filter(booking => booking.bookingId !== bookingId));
       } else {
         Alert.alert("Error", response.message);
       }
@@ -39,13 +38,12 @@ const MyBookings = () => {
     }
   };
 
-  // Function to handle rebooking
   const handleRebook = async (booking) => {
     try {
-      const response = await rebook(booking); // Pass booking details for rebooking
+      const response = await rebook(booking);
       if (response.success) {
         Alert.alert("Success", "Your booking has been rebooked.");
-        setBookings(prevBookings => prevBookings.filter(b => b.bookingId !== booking.bookingId)); // Update state
+        setBookings(prevBookings => prevBookings.filter(b => b.bookingId !== booking.bookingId));
       } else {
         Alert.alert("Error", response.message);
       }
@@ -55,10 +53,12 @@ const MyBookings = () => {
     }
   };
 
+  const handleInviteFriends = (bookingId) => {
+    navigation.navigate('InviteFriendBuddy', { bookingId });
+  };
+
   return (
     <View style={styles.container}>
-      
-      {/* Tabs for Upcoming and Completed */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tabButton, activeTab === 'Upcoming' && styles.activeTabButton]}
@@ -78,21 +78,25 @@ const MyBookings = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Scrollable Booking List */}
       <ScrollView style={styles.scrollView}>
         {bookings
           .filter(booking => activeTab === 'Upcoming' ? new Date(booking.bookingDate) >= new Date() : new Date(booking.bookingDate) < new Date())
           .map((booking) => (
             <View key={booking.bookingId} style={styles.bookingContainer}>
               <View style={styles.bookingDetails}>
-                <Text style={styles.bookingDate}>Booking Date: {booking.bookingDate}</Text>
-                <Text style={styles.bookingTime}>Time: {booking.slotStartTime}</Text>
+                <Text style={styles.bookingDate}>Date: {booking.bookingDate}</Text>
                 <Text style={styles.gymName}>{booking.gymName}</Text>
-                <Text style={styles.gymRating}>Rating: {booking.gymRating ? booking.gymRating : 'N/A'}</Text>
                 <Text style={styles.subscriptionPrice}>Price: ${booking.subscriptionPrice}</Text>
+                
+                {/* Small text link to invite friends */}
+                {booking.invitedBuddyCount === "0" && (
+                  <TouchableOpacity onPress={() => handleInviteFriends(booking.bookingId)}>
+                    <Text style={styles.inviteLink}>Invite friends to join!</Text>
+                  </TouchableOpacity>
+                )}
               </View>
               <Image
-                source={{ uri: booking.gymImage }} // Add a field for gym image in the booking data
+                source={{ uri: booking.gymImage }}
                 style={styles.gymImage}
                 resizeMode="cover"
               />
@@ -123,40 +127,25 @@ const MyBookings = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f9f0', // Light green background
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2e7d32', // Dark green color
-    textAlign: 'center',
-    marginBottom: 20,
+    backgroundColor: '#f5f5f5', // Light gray background for a clean look
   },
   tabContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 20,
+    marginVertical: 10,
   },
   tabButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 20,
-    backgroundColor: '#e0f2f1', // Light green for the tabs
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    backgroundColor: '#e0f7fa', // Light blue for tabs
   },
   activeTabButton: {
-    backgroundColor: '#a5d6a7', // Lighter green for the active tab
+    backgroundColor: '#80deea', // Darker blue for active tab
   },
   tabButtonText: {
-    color: '#2e7d32', // Dark green text
-    fontSize: 18,
+    color: '#00796b', // Dark teal text
+    fontSize: 16,
     fontWeight: 'bold',
   },
   activeTabText: {
@@ -166,50 +155,48 @@ const styles = StyleSheet.create({
     marginBottom: 60,
   },
   bookingContainer: {
-    marginBottom: 20,
-    padding: 15,
+    marginBottom: 15,
+    padding: 10,
     borderRadius: 10,
     backgroundColor: '#ffffff', // White background for bookings
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: 1,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   bookingDetails: {
     marginVertical: 5,
   },
   bookingDate: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2e7d32', // Dark green
-  },
-  bookingTime: {
     fontSize: 14,
-    color: '#444', // Dark gray
+    color: '#00796b', // Dark teal
   },
   gymName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#388e3c', // Medium green
+    color: '#004d40', // Darker teal
     marginTop: 5,
   },
-  gymRating: {
-    fontSize: 14,
-    color: '#666', // Gray for rating
-  },
   subscriptionPrice: {
-    fontSize: 16,
-    color: '#2e7d32', // Dark green
+    fontSize: 14,
+    color: '#00796b',
     fontWeight: 'bold',
+    marginTop: 5,
+  },
+  inviteLink: {
+    fontSize: 14,
+    color: '#2196F3', // Blue for link
+    marginTop: 5,
+    textDecorationLine: 'underline', // Underline to indicate it's a link
   },
   gymImage: {
-    height: 150,
+    height: 120,
     width: '100%',
-    borderRadius: 10,
+    borderRadius: 8,
     marginTop: 10,
   },
   cancelButton: {

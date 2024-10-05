@@ -11,7 +11,7 @@ const PaymentScreen = ({ route, navigation }) => {
   const handlePayment = async () => {
     const data = await createBooking(slotDetails);
     if(data) {
-      navigation.navigate('ConfirmationScreen', {slotDetails});
+      navigation.navigate('ConfirmationScreen', {slotDetails, data});
     } else {
       Alert.alert("Some error occured while booking slot");
     }

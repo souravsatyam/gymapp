@@ -3,7 +3,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://8d71-2401-4900-61a8-2089-585a-d7f0-b36f-13ca.ngrok-free.app/user/api'; // Change to HTTP for testing
+const BASE_URL = 'https://baa5-2406-7400-94-d9e1-89c0-885c-a318-e98c.ngrok-free.app/user/api'; // Change to HTTP for testing
 
 // Function to handle login
 export const loginUser = async (phoneNumber) => {
@@ -192,10 +192,11 @@ export const verifyOtp = async (mobileNumber, otp) => {
       });
       
       // Handle response
+      console.log("Response Data received", response.data);
       console.log("Response Status", response.status);
       if (response.status === 200 || response.status === 201) {
        
-        return true;
+        return response.data;
       } else {
       
         return false;
@@ -276,4 +277,34 @@ export const rejectFriendRequest = async (requestId) => {
     } catch (error) {
         throw new Error(error.response.data.message || 'Error rejecting request');
     }
+};
+
+
+export const fetchFriends = async () => {
+  const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+  const response = await axios.get(`${BASE_URL}/friends/get`, {
+    headers: {
+      Authorization: `Bearer ${userToken}`, // Make sure to replace <your_token> with the actual token
+    }});
+  const data = await response.data;
+  return data;
+};
+
+
+export const inviteBuddyRequest = async (bookingId, toUserId) => {
+  try {
+    const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+    const response = await axios.post(`${BASE_URL}/buddy/send`, {
+      toUserId,
+      bookingId,
+  }, {
+    headers: {
+      Authorization: `Bearer ${userToken}`, // Make sure to replace <your_token> with the actual token
+    },
+  });
+    return response.data
+  } catch (error) {
+    console.error('Error inviting buddy:', error);
+    Alert.alert('Error', 'An error occurred while sending the invitation.');
+  }
 };

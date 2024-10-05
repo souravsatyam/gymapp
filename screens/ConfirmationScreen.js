@@ -1,8 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 
-const ConfirmationScreen = ({ route }) => {
-  const { slotDetails } = route.params; // Get slot details from navigation parameters
+const ConfirmationScreen = ({ route, navigation }) => {
+  const { slotDetails, data } = route.params; // Get slot details from navigation parameters
+  
+  console.log("Data received", data);
+ 
 
   return (
     <View style={styles.container}>
@@ -26,7 +29,7 @@ const ConfirmationScreen = ({ route }) => {
           <Text style={styles.detail}>Date & time: {slotDetails.date} - {slotDetails.time}</Text>
         </View>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("InviteFriendBuddy", {bookingId: data.bookingId})}>
           <Text style={styles.buttonText}>Invite friends</Text>
         </TouchableOpacity>
       </View>

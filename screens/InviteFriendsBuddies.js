@@ -2,78 +2,50 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Footer from '../components/Footer';
-import { fetchAllNearByUser } from '../api/apiService';
-import { addFriend } from '../api/apiService'; // Import the addFriend function
+import { fetchFriends, inviteBuddyRequest } from '../api/apiService';
 
-const InviteBuddiesScreen = ({ navigation }) => {
+const InviteFriendBuddiesScreen = ({ navigation, route }) => {
   const [searchText, setSearchText] = useState('');
   const [buddyList, setBuddyList] = useState([]);
+  const { bookingId } = route.params; // Assuming bookingId is passed as a parameter
 
-  // Fetch nearby users from the API
-
-  const fetchNearbyUsers = async () => {
+  // Fetch friends on component mount
+  const fetchBuddyList = async () => {
     try {
-      const data = await fetchAllNearByUser(searchText);
-      setBuddyList(data);
+      const data = await fetchFriends();
+      setBuddyList(data.accepted); // Use the "accepted" array from the response
     } catch (error) {
-      console.error('Error fetching nearby users:', error);
+      console.error('Error fetching buddy list:', error);
     }
   };
 
   useEffect(() => {
-    
-
-    fetchNearbyUsers();
+    fetchBuddyList();
   }, []);
 
-  // Handle inviting a buddy
-  const handleInvite = async (id) => {
-    try {
-      const response = await addFriend(id); // Call the API to send a friend request
-      console.log('Friend request sent:', response);
-
-      // Update the invited status in the UI
-      
-      fetchNearbyUsers();
-    } catch (error) {
-      console.error('Error inviting friend:', error);
-    }
+  const searchUser = (user) => {
+    setSearchText(user);
   };
 
-
-  const searchUser = async (user) => {
-    setSearchText(user);
-    fetchNearbyUsers();
+  const inviteBuddy = async (bookingId, id) => {
+        const resp = await inviteBuddyRequest(bookingId, id);
+        console.log("Response Successful", resp);
+        navigation.navigate("MyBookings");
   }
 
   // Render a buddy
   const renderBuddy = ({ item }) => (
     <View style={styles.buddyItem}>
-      <Image source={{ uri: item.image }} style={styles.buddyImage} />
+      <Image 
+        source={item.profile_pic ? { uri: item.profile_pic } : require('../assets/cultfit.jpg')} 
+        style={styles.buddyImage} 
+      />
       <View style={styles.buddyInfo}>
-        <Text style={styles.buddyName}>{item.name}</Text>
-        <Text style={[styles.buddyStatus, { color: item.inGym ? 'green' : 'red' }]}>
-          {item.status}
-        </Text>
+        <Text style={styles.buddyName}>{item.full_name}</Text>
       </View>
-      {(item?.invited?.sent && item?.invited?.accepted)  && (
-        <TouchableOpacity style={styles.invitedButton}>
-          <Text style={styles.invitedButtonText}>Friends</Text>
-        </TouchableOpacity>
-      )}
-      
-      {(item?.invited?.sent && !item?.invited?.accepted)  && (
-        <TouchableOpacity style={styles.invitedButton}>
-          <Text style={styles.invitedButtonText}>Invited</Text>
-        </TouchableOpacity>
-      )}
-      
-      {(!item?.invited?.sent && !item?.invited?.accepted)  && (
-        <TouchableOpacity style={styles.inviteButton} onPress={() => handleInvite(item.id)}>
-          <Text style={styles.invitedButtonText}>Add Friend</Text>
-        </TouchableOpacity>
-      )}
-      
+      <TouchableOpacity style={styles.inviteButton} onPress={() => inviteBuddy(bookingId, item.fromUserId)}>
+        <Text style={styles.inviteButtonText}>Invite buddy</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -83,9 +55,14 @@ const InviteBuddiesScreen = ({ navigation }) => {
       <View style={styles.header}>
         <Text><Icon name="dumbbell" size={40} color="#fff" /></Text>
         <View>
-          <Text style={styles.headerTitle}>Add your friends and Invite as buddy</Text>
-          <Text style={styles.headerSubtitle}>Team up with friends for a better workout!</Text>
+          <Text style={styles.headerTitle}>Invite Friends</Text>
+          <Text style={styles.headerSubtitle}>Add your buddies for a workout!</Text>
         </View>
+      </View>
+
+      {/* Display Booking ID */}
+      <View style={styles.bookingIdContainer}>
+        <Text style={styles.bookingIdText}>Booking ID: {bookingId}</Text>
       </View>
 
       {/* Search bar */}
@@ -93,7 +70,7 @@ const InviteBuddiesScreen = ({ navigation }) => {
         <Text><Icon name="magnify" size={24} color="#888" /></Text>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search User"
+          placeholder="Search Friends"
           placeholderTextColor="#888"
           value={searchText}
           onChangeText={(text) => searchUser(text)}
@@ -102,11 +79,12 @@ const InviteBuddiesScreen = ({ navigation }) => {
 
       {/* Buddy List */}
       <FlatList
-        data={buddyList?.filter((buddy) => buddy.name.toLowerCase().includes(searchText.toLowerCase()))}
+        data={buddyList.filter((buddy) => buddy.full_name.toLowerCase().includes(searchText.toLowerCase()))}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderBuddy}
         contentContainerStyle={styles.buddyList}
       />
+
       <Footer navigation={navigation} />
     </View>
   );
@@ -133,6 +111,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#66BB6A',
     marginLeft: 10,
+  },
+  bookingIdContainer: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+  },
+  bookingIdText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -173,10 +160,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  buddyStatus: {
-    fontSize: 14,
-    color: '#666',
-  },
   inviteButton: {
     backgroundColor: '#4CAF50',
     paddingVertical: 8,
@@ -187,16 +170,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  invitedButton: {
-    backgroundColor: '#B0BEC5',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  invitedButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
 });
 
-export default InviteBuddiesScreen;
+export default InviteFriendBuddiesScreen;

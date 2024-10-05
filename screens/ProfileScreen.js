@@ -118,8 +118,10 @@ const ProfileScreen = ({ navigation }) => {
           <Text style={styles.statLabel}>Posts</Text>
         </View>
         <View style={styles.statCard}>
+          <TouchableOpacity  onPress={() => navigation.navigate("InviteFriendBuddy")}>
           <Text style={styles.statValue}>{userData?.followers_count || 0}</Text>
           <Text style={styles.statLabel}>Friends</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statValueTime}>{userData?.total_work_out_time || 0} h.</Text>
