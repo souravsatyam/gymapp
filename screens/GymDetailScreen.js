@@ -1,11 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Modal, Dimensions } from 'react-native'; // Import Dimensions
 import { fetchIndividualGymData } from '../api/apiService';
 import SlotSelectionScreen from './SlotSelectionScreen';
-import Footer from '../components/Footer';
 import AmenitiesListPopup from '../components/AmenitiesListPopup';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Importing FontAwesome for icons
+import Icon from 'react-native-vector-icons/FontAwesome';
+
+// Get screen width
+const screenWidth = Dimensions.get('window').width;
 
 const GymDetailScreen = ({ navigation, route }) => {
   const [gymData, setGymData] = useState(null);
@@ -14,6 +15,7 @@ const GymDetailScreen = ({ navigation, route }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSlotSelectionVisible, setSlotSelectionVisible] = useState(false);
   const [showAmenitiesPopup, setShowAmenitiesPopup] = useState(false);
+  const [isDescriptionExpanded, setDescriptionExpanded] = useState(false);
 
   const { gym_id } = route.params;
 
@@ -32,7 +34,7 @@ const GymDetailScreen = ({ navigation, route }) => {
 
   const handleScroll = (event) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.floor(contentOffsetX / 300);
+    const index = Math.floor(contentOffsetX / screenWidth); // Updated to use screen width
     setCurrentIndex(index);
   };
 
@@ -66,6 +68,8 @@ const GymDetailScreen = ({ navigation, route }) => {
     );
   }
 
+  const truncatedDescription = gymData.description.split(' ').slice(0, 50).join(' ');
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -92,26 +96,35 @@ const GymDetailScreen = ({ navigation, route }) => {
                   <Image source={{ uri: image }} style={styles.image} />
                 </TouchableOpacity>
               )) || (
-                  <Image
-                    source={{
-                      uri: 'https://example.com/default_image.png',
-                    }}
-                    style={styles.image}
-                  />
-                )}
+                <Image
+                  source={{
+                    uri: 'https://example.com/default_image.png',
+                  }}
+                  style={styles.image}
+                />
+              )}
             </ScrollView>
 
+            {/* Dot Indicators */}
             <View style={styles.dotContainer}>
               {(gymData.images || []).map((_, index) => (
                 <View key={index} style={[styles.dot, currentIndex === index && styles.activeDot]} />
               ))}
             </View>
           </View>
+
+          <Text style={styles.gymName}>{gymData.name}</Text>
+          <Text style={styles.gymDescription}>
+            {isDescriptionExpanded ? gymData.description : `${truncatedDescription}...`}
+          </Text>
+          <TouchableOpacity onPress={() => setDescriptionExpanded(!isDescriptionExpanded)}>
+            <Text style={styles.showMoreText}>
+              {isDescriptionExpanded ? 'Show Less' : 'Show More'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.gymName}>{gymData.name}</Text>
-          <Text style={styles.gymDescription}>{gymData.description}</Text>
           <View style={styles.priceAvailabilityContainer}>
             <Text style={styles.city}>City: {gymData.city}</Text>
           </View>
@@ -137,9 +150,10 @@ const GymDetailScreen = ({ navigation, route }) => {
       </ScrollView>
 
       <TouchableOpacity style={styles.button} onPress={openSlotSelection}>
-        <Text style={styles.buttonText}>Select Slot</Text>
+        <Text style={styles.buttonText}>Select Slot </Text>
       </TouchableOpacity>
 
+      {/* Image Modal */}
       <Modal visible={isModalVisible} transparent={true} animationType="fade">
         <View style={styles.modalContainer}>
           <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
@@ -154,12 +168,19 @@ const GymDetailScreen = ({ navigation, route }) => {
         <AmenitiesListPopup gymId={gym_id} onClose={toggleAmenitiesPopup} />
       )}
 
-      <Footer navigation={navigation} />
+      {/* Slot Selection Modal */}
+      <Modal visible={isSlotSelectionVisible} transparent={true} animationType="slide">
+        <View style={styles.slotSelectionModal}>
+          <TouchableOpacity style={styles.closeButton} onPress={closeSlotSelection}>
+            <Text style={styles.closeButtonText}>✖️</Text>
+          </TouchableOpacity>
+          {/* Render slot selection screen */}
+          <SlotSelectionScreen navigation={navigation} gym={gymData} />
+        </View>
+      </Modal>
     </View>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -168,28 +189,28 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    padding: 10, // Reduced padding for tighter spacing
+    padding: 10,
   },
   scrollContent: {
-    paddingBottom: 80, // Space for the button
+    paddingBottom: 80,
   },
   headerContainer: {
-    marginBottom: 15, // Reduced margin for tighter spacing
+    marginBottom: 15,
   },
   imageContainer: {
-    position: 'relative', // Allow the dots to overlay on the image
+    position: 'relative',
   },
   imageScroll: {
     marginTop: 10,
   },
   image: {
-    width: 406,
+    width: screenWidth, // Adjusted to fit the screen width
     height: 200,
     borderRadius: 10,
   },
   dotContainer: {
     position: 'absolute',
-    bottom: 10, // Adjust position as needed
+    bottom: 10, // Positioning the dots within the image area
     left: '50%',
     transform: [{ translateX: -50 }],
     flexDirection: 'row',
@@ -205,41 +226,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
   },
   welcomeText: {
-    color: '#4CAF50', // Added green color for welcome text
-    fontSize: 20, // Adjusted font size
-    fontWeight: 'bold', // Bold for welcome text
+    color: '#4CAF50',
+    fontSize: 20,
+    fontWeight: 'bold',
     marginBottom: 5,
-    fontFamily: 'Roboto', // Changed to Roboto for consistency
+    fontFamily: 'Roboto',
   },
   userName: {
     fontSize: 24,
-    fontWeight: 'bold', // Bold for user name
+    fontWeight: 'bold',
     marginBottom: 5,
-    fontFamily: 'Roboto', // Changed to Roboto
+    fontFamily: 'Roboto',
   },
   bookingPrompt: {
-    color: '#333', // Changed to dark grey for better contrast
+    color: '#333',
     fontSize: 16,
     marginBottom: 10,
-    fontFamily: 'Roboto', // Changed to Roboto
+    fontFamily: 'Roboto',
   },
   card: {
-    //backgroundColor: '#fff',
-    //borderRadius: 10,
-    padding: 20, // Reduced padding for tighter spacing
-    marginBottom: 15, // Reduced margin for tighter spacing
-    //elevation: 3,
+    padding: 20,
+    marginBottom: 15,
   },
   gymName: {
     fontSize: 24,
-    fontWeight: 'bold', // Bold for gym name
-    color: '#4CAF50', // Green color for gym name
-    fontFamily: 'Roboto', // Changed to Roboto
+    fontWeight: 'bold',
+    color: '#4CAF50',
+    fontFamily: 'Roboto',
+    marginTop: 10, // Space between image and gym name
   },
   gymDescription: {
-    fontSize: 14, // Adjusted font size to match the amenities list
-    color: '#333', // Changed to dark grey for consistency
-    fontFamily: 'Roboto', // Changed to Roboto
+    fontSize: 14,
+    color: '#333',
+    fontFamily: 'Roboto',
     marginBottom: 5,
   },
   priceAvailabilityContainer: {
@@ -247,12 +266,11 @@ const styles = StyleSheet.create({
   },
   city: {
     fontSize: 14,
-    color: '#333', // Changed to dark grey
-    fontFamily: 'Roboto', // Changed to Roboto
+    color: '#333',
+    fontFamily: 'Roboto',
   },
   amenitiesContainer: {
     padding: 20,
-    //backgroundColor: '#f9f9f9',
     borderRadius: 10,
     marginTop: 10,
     marginBottom: 20,
@@ -272,7 +290,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-    width: '45%', // Adjust width to fit 2 items per row
+    width: '45%',
   },
   amenityText: {
     marginLeft: 5,
@@ -284,14 +302,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 10,
-    
   },
   bottomSpacing: {
-    height: 50, // Space for the button
+    height: 50,
   },
   button: {
     position: 'absolute',
-    bottom: 120, // Reduced bottom value to move the button up
+    bottom: 20, // Fixed position of the button at the bottom
     left: 20,
     right: 20,
     backgroundColor: '#4CAF50',
@@ -303,7 +320,41 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     fontWeight: 'bold',
-  }
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 1,
+  },
+  closeButtonText: {
+    fontSize: 30,
+    color: '#fff',
+  },
+  slotSelectionModal: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  showMoreText: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
+    marginTop: 10,
+    textAlign: 'center',
+  },
 });
 
 export default GymDetailScreen;

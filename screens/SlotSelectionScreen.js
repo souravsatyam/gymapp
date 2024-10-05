@@ -61,9 +61,9 @@ const SlotSelectionScreen = ({ navigation, gym }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Close button */}
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
+      {/* <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
         <Icon name="close-outline" size={30} color="#fff" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <Text style={styles.title}>Select a Slot</Text>
 

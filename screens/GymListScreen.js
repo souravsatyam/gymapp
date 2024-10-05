@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   View, 
   Text, 
@@ -8,29 +8,66 @@ import {
   TouchableOpacity, 
   TextInput, 
   KeyboardAvoidingView, 
-  Platform 
+  Platform,
+  Alert 
 } from 'react-native';
+import { fetchAllGyms } from '../api/apiService';
+import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-import { fetchAllGyms } from '../api/apiService';
 import Footer from '../components/Footer';
+import axios from 'axios';
 
 export default function GymListScreen({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [gyms, setGyms] = useState([]);
+  const [currentLocation, setCurrentLocation] = useState('');
+  const [address, setAddress] = useState('');
 
   // Function to fetch gyms based on latitude and longitude
-  const fetchGyms = async () => {
+  const fetchGyms = async (lat, long) => {
     try {
-      const gymList = await fetchAllGyms();
+      const gymList = await fetchAllGyms(lat, long);
       setGyms(gymList);
     } catch (error) {
       console.error('Error fetching gyms:', error);
     }
   };
 
+  // Get current location and address
+  const getLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Location permission is required to access your location.');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      fetchGyms(location.coords.latitude, location.coords.longitude);
+      fetchAddress(location.coords.latitude, location.coords.longitude);
+    } catch (error) {
+      fetchGyms();
+      console.error('Error getting location:', error);
+      Alert.alert('Error', 'Could not retrieve location. Please try again later.');
+    }
+  };
+
+  // Fetch address based on latitude and longitude
+  const fetchAddress = async (lat, long) => {
+    try {
+      const response = await axios.get(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${long}&localityLanguage=en`);
+      if (response.data) {
+        setAddress(response.data.city || response.data.locality || 'Unknown location');
+      }
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      setAddress('Error fetching address');
+    }
+  };
+
   useEffect(() => {
-    fetchGyms(); // Call the API when the component mounts
+    getLocation(); // Get the current location when the component mounts
   }, []);
 
   // Filter gyms based on search input
@@ -45,11 +82,22 @@ export default function GymListScreen({ navigation }) {
   // Render each gym
   const renderGym = ({ item }) => (
     <TouchableOpacity style={styles.gymCard} onPress={() => redirectToGymDetails(item.gymId)}>
-      <Image source={{ uri: item.images?.[0]?.imageUrl || 'https://via.placeholder.com/150' }} style={styles.gymImage} />
+      <Image source={{ uri: item.images?.[0]?.imageUrl || 'https://www.hussle.com/blog/wp-content/uploads/2020/12/Gym-structure-1080x675.png' }} style={styles.gymImage} />
       <View style={styles.gymInfo}>
         <Text style={styles.gymName}>{item.gymName}</Text>
+        <Text style={styles.gymDescription}>
+          {item.gymDescription ? item.gymDescription.substring(0, 100) + '...' : 'No description available'}
+        </Text>
         <Text style={styles.gymPrice}>₹ {item.subscriptionPrices?.[0] || 'N/A'}/session</Text>
+        <Text style={styles.gymDistance}>📍 {(item.distance ? item.distance.toFixed(1) : 'N/A')} km</Text>
         <Text style={styles.gymRating}>⭐ {item.gymRating || 'N/A'}</Text>
+        {/* Display part of the description */}
+        
+        <TouchableOpacity style={styles.bookNowButton} onPress={() => redirectToGymDetails(item.gymId)}>
+          <Text style={styles.bookNowText}>
+            <Icon name="check-circle" size={18} color="#fff" /> Book Now
+          </Text>
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -64,20 +112,19 @@ export default function GymListScreen({ navigation }) {
         <View style={styles.headerContent}>
           <View style={styles.locationContainer}>
             <Text style={styles.locationText}>
-              <MaterialIcon name="location-on" size={18} color="#000" /> Gurugram, IN
+              <MaterialIcon name="location-on" size={20} color="#fff" /> 
+              {address || 'Fetching location...'}
             </Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('NotificationListScreen')}>
-            <Text>
-              <Icon name="bell" size={24} color="green" />
-            </Text>
+            <Icon name="bell" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
         <Text style={styles.greetingText}>Hey Deepak, looking for a gym or a workout buddy?</Text>
         <TextInput
           style={styles.searchInput}
           placeholder="Search nearby gyms"
-          placeholderTextColor="#666"
+          placeholderTextColor="#ccc"
           value={searchText}
           onChangeText={setSearchText}
         />
@@ -98,13 +145,14 @@ export default function GymListScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f5f5f5',
   },
   header: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#4CAF50',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    elevation: 5,
   },
   headerContent: {
     flexDirection: 'row',
@@ -112,53 +160,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
   },
   locationText: {
-    fontSize: 12,
-    color: '#000',
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: 'bold',
   },
   greetingText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#fff',
     textAlign: 'center',
     marginVertical: 10,
   },
   searchInput: {
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 20,
     padding: 10,
     color: '#000',
     fontSize: 14,
     borderColor: '#ccc',
     borderWidth: 1,
+    marginTop: 10,
   },
   gymList: {
     paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   gymCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    marginBottom: 10,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    marginBottom: 20,
     overflow: 'hidden',
-    elevation: 2,
-    height: 300,
+    elevation: 3,
   },
   gymImage: {
     width: '100%',
-    height: 200,
+    height: 180,
     resizeMode: 'cover',
   },
   gymInfo: {
-    padding: 6,
-    paddingTop: 4,
+    padding: 10,
   },
   gymName: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
-    fontFamily: 'Roboto',
     color: '#4CAF50',
     marginBottom: 5,
     textAlign: 'left',
@@ -170,15 +217,32 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     textAlign: 'left',
   },
+  gymDistance: {
+    fontSize: 12,
+    color: '#555',
+    marginBottom: 5,
+  },
   gymRating: {
-    fontSize: 10,
-    color: 'green',
+    fontSize: 12,
+    color: '#FFD700',
     marginBottom: 3,
-    textAlign: 'left',
+  },
+  gymDescription: {
+    fontSize: 12,
+    color: '#333',
+    marginBottom: 5,
+  },
+  bookNowButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    marginTop: 10,
+    alignSelf: 'flex-end',
   },
   bookNowText: {
     color: '#fff',
     fontWeight: 'bold',
-    textAlign: 'center',
+    fontSize: 14,
   },
 });
