@@ -40,7 +40,6 @@ const SlotSelectionScreen = ({ navigation, gym }) => {
       capacity: selectedSlot.capacity,
       pricePerSlot: selectedSlot.price,
       subscriptionId: gym?.subscriptions[0].id
-
     };
 
     // Navigate to PaymentScreen with slot details
@@ -61,6 +60,11 @@ const SlotSelectionScreen = ({ navigation, gym }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Close button */}
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
+        <Icon name="close-outline" size={30} color="#fff" />
+      </TouchableOpacity>
+
       <Text style={styles.title}>Select a Slot</Text>
 
       {/* Date Picker */}
@@ -159,6 +163,16 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#ffffff', // Changed background color to white
   },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
+    padding: 10,
+    backgroundColor: '#333',
+    borderRadius: 20,
+    elevation: 3,
+  },
   title: {
     fontSize: 28,
     color: '#333', // Darker text for better readability
@@ -229,35 +243,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   durationButton: {
-    width: 80, // Set a fixed width for square layout
-    height: 80, // Set a fixed height for square layout
-    backgroundColor: '#28a745', // Uniform color for duration buttons
+    width: 80, // Fixed width for uniformity
+    padding: 10,
+    borderWidth: 2,
+    borderColor: '#333', // Darker border color
     borderRadius: 10,
-    margin: 5, // Add margin around buttons for spacing
+    marginHorizontal: 10, // Spacing between buttons
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 3, // Shadow for the button
   },
   selectedDurationButton: {
-    backgroundColor: '#218838', // Darker green for the selected button
+    backgroundColor: '#28a745', // Green background for selected button
   },
   durationText: {
-    fontSize: 20, // Increased font size for visibility
-    fontWeight: 'bold', // Bold font for emphasis
-    color: '#333',
+    fontSize: 16,
   },
   selectedDuration: {
-    color: '#333',
-    fontSize: 18,
+    fontSize: 16,
+    color: '#333', // Darker text for better readability
     marginBottom: 20,
     textAlign: 'center',
-  },
-  confirmButton: {
-    padding: 15,
-    backgroundColor: '#28a745', // Confirm button matches others
-    borderRadius: 10,
-    alignItems: 'center',
-    elevation: 3, // Shadow for the button
   },
 });
 

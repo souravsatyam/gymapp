@@ -123,7 +123,6 @@ const MyBookings = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#f0f9f0', // Light green background
   },
   title: {

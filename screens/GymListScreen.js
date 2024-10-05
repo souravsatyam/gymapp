@@ -73,7 +73,7 @@ export default function GymListScreen({ navigation }) {
         <Text style={styles.greetingText}>Hey Deepak, looking for a gym or a workout buddy?</Text>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search gyms or friends"
+          placeholder="Search nearby gyms"
           placeholderTextColor="#666"
           value={searchText}
           onChangeText={setSearchText}

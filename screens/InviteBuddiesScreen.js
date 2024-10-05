@@ -13,7 +13,7 @@ const InviteBuddiesScreen = ({ navigation }) => {
 
   const fetchNearbyUsers = async () => {
     try {
-      const data = await fetchAllNearByUser();
+      const data = await fetchAllNearByUser(searchText);
       setBuddyList(data);
     } catch (error) {
       console.error('Error fetching nearby users:', error);
@@ -39,6 +39,12 @@ const InviteBuddiesScreen = ({ navigation }) => {
       console.error('Error inviting friend:', error);
     }
   };
+
+
+  const searchUser = async (user) => {
+    setSearchText(user);
+    fetchNearbyUsers();
+  }
 
   // Render a buddy
   const renderBuddy = ({ item }) => (
@@ -90,13 +96,13 @@ const InviteBuddiesScreen = ({ navigation }) => {
           placeholder="Search Friend"
           placeholderTextColor="#888"
           value={searchText}
-          onChangeText={(text) => setSearchText(text)}
+          onChangeText={(text) => searchUser(text)}
         />
       </View>
 
       {/* Buddy List */}
       <FlatList
-        data={buddyList.filter((buddy) => buddy.name.toLowerCase().includes(searchText.toLowerCase()))}
+        data={buddyList?.filter((buddy) => buddy.name.toLowerCase().includes(searchText.toLowerCase()))}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderBuddy}
         contentContainerStyle={styles.buddyList}

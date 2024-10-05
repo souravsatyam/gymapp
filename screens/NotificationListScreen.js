@@ -1,51 +1,60 @@
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { acceptFriendRequest, fetchAllNotifications, rejectFriendRequest } from '../api/apiService'; // Ensure this path is correct
 
-const notifications = [
-  {
-    id: '1',
-    user: 'kiero_d',
-    others: '26 others',
-    action: 'liked your photo',
-    time: '3h ago',
-  },
-  {
-    id: '2',
-    user: 'Josh',
-    action: 'sent you a buddy request',
-    time: 'Yesterday',
-    type: 'buddyRequest',
-  },
-  {
-    id: '3',
-    user: 'Josh',
-    action: 'invited you to join a workout',
-    time: '2d ago',
-    type: 'workoutRequestInvite',
-  },
-  {
-    id: '4',
-    user: 'Josh',
-    action: 'accepted your invitation for workout',
-    time: '2d ago',
-    type: 'workoutSentInvite',
-  },
-  {
-    id: '5',
-    user: 'kiero_d',
-    action: 'accepted your buddy request',
-    time: '3h ago',
-  }
-];
+const NotificationListScreen = ({ navigation }) => {
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const NotificationListScreen = ({ navigation }) => { // Accept navigation prop
+  // Fetch notifications from API when the component is mounted
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const data = await fetchAllNotifications();
+        console.log("Data is", data);
+        if (data.results) {
+          setNotifications(data.results); 
+        } else {
+          setError(data.message);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.log("Error is", error);
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  const acceptRejectRequest = async (requestId, action) => {
+    try {
+        if (action === 'accept') {
+            await acceptFriendRequest(requestId);
+            setNotifications(prev => prev.filter(notification => notification.id !== requestId));
+            navigation.navigate('Profile')
+
+        } else if (action === 'reject') {
+            await rejectFriendRequest(requestId);
+            setNotifications(prev => prev.filter(notification => notification.id !== requestId));
+            navigation.navigate('Profile')
+        }
+    } catch (error) {
+        setError(error.message);
+    }
+};
+
+  // Render individual notification item
   const renderItem = ({ item }) => (
     <View style={styles.notificationItem}>
       <View style={styles.notificationContent}>
         <Text style={styles.notificationText}>
-          <Text style={styles.username}>{item.user}</Text> {item.others ? `, ${item.others}` : ''} {item.action}
+          <Text style={styles.username}>{item.user || 'Unknown User'}</Text> 
+          {item.others ? `, ${item.others}` : ''} {item.message || 'No message available.'}
         </Text>
-        <Text style={styles.time}>{item.time}</Text>
+        <Text style={styles.time}>{item.time || 'Time not available.'}</Text>
       </View>
       <View style={styles.actionButtons}>
         {item.type === 'buddyRequest' && (
@@ -58,10 +67,23 @@ const NotificationListScreen = ({ navigation }) => { // Accept navigation prop
             </TouchableOpacity>
           </>
         )}
+
+        {item.type === 'friendRequest' && (
+          <>
+            <TouchableOpacity style={styles.acceptButton} onPress={() => acceptRejectRequest(item.relatedId, 'accept')}>
+              <Text style={styles.buttonText}>Accept</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.declineButton} onPress={() => acceptRejectRequest(item.relatedId, 'reject')}>
+              <Text style={styles.buttonText}>Decline</Text>
+            </TouchableOpacity>
+          </>
+        )}
+
+        
         {item.type === 'workoutRequestInvite' && (
           <TouchableOpacity 
             style={styles.viewButton} 
-            onPress={() => navigation.navigate('WorkoutInvitation')} // Navigate to WorkoutInvitation screen
+            onPress={() => navigation.navigate('WorkoutInvitation')}
           >
             <Text style={styles.buttonText}>View Details</Text>
           </TouchableOpacity>
@@ -69,7 +91,7 @@ const NotificationListScreen = ({ navigation }) => { // Accept navigation prop
         {item.type === 'workoutSentInvite' && (
           <TouchableOpacity 
             style={styles.viewButton} 
-            onPress={() => navigation.navigate('WorkoutRequest')} // Navigate to WorkoutInvitation screen
+            onPress={() => navigation.navigate('WorkoutRequest')}
           >
             <Text style={styles.buttonText}>View Details</Text>
           </TouchableOpacity>
@@ -77,6 +99,23 @@ const NotificationListScreen = ({ navigation }) => { // Accept navigation prop
       </View>
     </View>
   );
+
+  // Show a loader or error message if applicable
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -92,7 +131,6 @@ const NotificationListScreen = ({ navigation }) => { // Accept navigation prop
 };
 
 const styles = StyleSheet.create({
-  // Styles remain the same as your original code
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -161,6 +199,10 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 14,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
   },
 });
 

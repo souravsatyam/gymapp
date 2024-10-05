@@ -3,7 +3,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://bfe8-2401-4900-61b8-20a8-f8-b413-bea1-a07f.ngrok-free.app/user/api'; // Change to HTTP for testing
+const BASE_URL = 'https://8d71-2401-4900-61a8-2089-585a-d7f0-b36f-13ca.ngrok-free.app/user/api'; // Change to HTTP for testing
 
 // Function to handle login
 export const loginUser = async (phoneNumber) => {
@@ -226,3 +226,54 @@ export const verifyOtp = async (mobileNumber, otp) => {
       console.error("Error fetching bookings:", error);
     }
   };
+
+
+
+  export const fetchAllNotifications = async () => {
+    try {
+      const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+      const response = await axios.get(`${BASE_URL}/notifications/get`, {
+        headers: {
+          Authorization: `Bearer ${userToken}`, // Make sure to replace <your_token> with the actual token
+        },
+      });
+      return response.data
+    } catch (error) {
+      console.log("Error", error.response.data.message);
+      console.log('Failed to load notifications');
+      return error.response.data;
+    }
+  };
+
+
+  export const acceptFriendRequest = async (requestId) => {
+    try {
+        const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+        const response = await axios.post(`${BASE_URL}/friends/accept`, {
+            requestId: requestId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${userToken}`, // Make sure to replace <your_token> with the actual token
+          },
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response.data.message || 'Error accepting request');
+    }
+};
+
+export const rejectFriendRequest = async (requestId) => {
+    try {
+        const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+        const response = await axios.post(`${BASE_URL}/friends/reject`, {
+            requestId: requestId,
+        }, {
+          headers: {
+            Authorization: `Bearer ${userToken}`, // Make sure to replace <your_token> with the actual token
+          },
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response.data.message || 'Error rejecting request');
+    }
+};
