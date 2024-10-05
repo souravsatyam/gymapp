@@ -1,19 +1,21 @@
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Modal, Dimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import { fetchIndividualGymData } from '../api/apiService';
-import Svg, { Path } from 'react-native-svg';
 import SlotSelectionScreen from './SlotSelectionScreen';
+import Footer from '../components/Footer';
+import AmenitiesListPopup from '../components/AmenitiesListPopup';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Importing FontAwesome for icons
 
 const GymDetailScreen = ({ navigation, route }) => {
   const [gymData, setGymData] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [isSlotSelectionVisible, setSlotSelectionVisible] = useState(false);
+  const [showAmenitiesPopup, setShowAmenitiesPopup] = useState(false);
 
-  const { gym_id } = route.params; // Assuming gym_id is passed via route params
-  console.log("Gym Id", gym_id);
+  const { gym_id } = route.params;
 
   useEffect(() => {
     fetchGymData();
@@ -30,7 +32,7 @@ const GymDetailScreen = ({ navigation, route }) => {
 
   const handleScroll = (event) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.floor(contentOffsetX / 300); // Calculate index based on image width
+    const index = Math.floor(contentOffsetX / 300);
     setCurrentIndex(index);
   };
 
@@ -44,16 +46,16 @@ const GymDetailScreen = ({ navigation, route }) => {
     setSelectedImage(null);
   };
 
-  const toggleShowAll = () => {
-    setShowAllAmenities((prevState) => !prevState);
-  };
-
   const openSlotSelection = () => {
     setSlotSelectionVisible(true);
   };
 
   const closeSlotSelection = () => {
     setSlotSelectionVisible(false);
+  };
+
+  const toggleAmenitiesPopup = () => {
+    setShowAmenitiesPopup(!showAmenitiesPopup);
   };
 
   if (!gymData) {
@@ -63,29 +65,6 @@ const GymDetailScreen = ({ navigation, route }) => {
       </View>
     );
   }
-
-  const renderSvg = (svgString) => {
-    const regex = /<svg[^>]*>(.*?)<\/svg>/s; // Regex to extract SVG content
-    const match = svgString.match(regex);
-
-    if (match) {
-      const svgContent = match[1];
-      const pathRegex = /<path[^>]*\/?>/g; // Extract paths from the SVG
-      const paths = svgContent.match(pathRegex);
-
-      return paths.map((path, index) => {
-        const attributes = path.match(/(\w+)="([^"]*)"/g); // Extract attributes
-        const props = {};
-        attributes.forEach(attr => {
-          const [key, value] = attr.split('=');
-          props[key] = value.replace(/"/g, '');
-        });
-        return <Path key={index} {...props} />;
-      });
-    }
-
-    return null;
-  };
 
   return (
     <View style={styles.container}>
@@ -99,81 +78,68 @@ const GymDetailScreen = ({ navigation, route }) => {
           <Text style={styles.userName}>Deepak Parmar</Text>
           <Text style={styles.bookingPrompt}>Want to book your gym sessions with just a tap?</Text>
 
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={handleScroll}
-            scrollEventThrottle={16} // Ensure smooth scrolling
-            style={styles.imageScroll}
-          >
-            {(gymData.images || []).map((image, index) => (
-              <TouchableOpacity key={index} onPress={() => openModal(image)}>
-                <Image source={{ uri: image }} style={styles.image} />
-              </TouchableOpacity>
-            )) || (
-                <Image
-                  source={{
-                    uri: 'https://example.com/default_image.png', // Provide a default image URL
-                  }}
-                  style={styles.image}
-                />
-              )}
-          </ScrollView>
+          <View style={styles.imageContainer}>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+              style={styles.imageScroll}
+            >
+              {(gymData.images || []).map((image, index) => (
+                <TouchableOpacity key={index} onPress={() => openModal(image)}>
+                  <Image source={{ uri: image }} style={styles.image} />
+                </TouchableOpacity>
+              )) || (
+                  <Image
+                    source={{
+                      uri: 'https://example.com/default_image.png',
+                    }}
+                    style={styles.image}
+                  />
+                )}
+            </ScrollView>
 
-          <View style={styles.dotContainer}>
-            {(gymData.images || []).map((_, index) => (
-              <View key={index} style={[styles.dot, currentIndex === index && styles.activeDot]} />
-            ))}
+            <View style={styles.dotContainer}>
+              {(gymData.images || []).map((_, index) => (
+                <View key={index} style={[styles.dot, currentIndex === index && styles.activeDot]} />
+              ))}
+            </View>
           </View>
         </View>
 
         <View style={styles.card}>
           <Text style={styles.gymName}>{gymData.name}</Text>
-          <Text>{gymData.description}</Text>
+          <Text style={styles.gymDescription}>{gymData.description}</Text>
           <View style={styles.priceAvailabilityContainer}>
             <Text style={styles.city}>City: {gymData.city}</Text>
-            <Text style={styles.state}>State: {gymData.state}</Text>
           </View>
         </View>
 
-      
+        {/* Amenities Display */}
         <View style={styles.amenitiesContainer}>
           <Text style={styles.amenitiesTitle}>What this gym offers:</Text>
-          <View style={styles.amenities}>
-            {gymData?.equipment_list?.length > 0 ? (
-              gymData.equipment_list.slice(0, showAllAmenities ? undefined : 4).map((amenity, index) => (
-                <View key={index} style={styles.amenityItem}>
-                  <View style={styles.iconContainer}>
-                    <Svg height="24" width="24" style={styles.icon}>
-                      {renderSvg(amenity.equipment_icon_svg)}
-                    </Svg>
-                  </View>
-                  <Text style={styles.amenityText}>{amenity.equipment_name || 'Unnamed Equipment'}</Text>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.noAmenitiesText}>No amenities listed by gym.</Text>
-            )}
+          <View style={styles.amenitiesList}>
+            {(gymData.equipment_list || []).slice(0, 4).map((amenity, index) => (
+              <View key={index} style={styles.amenityItem}>
+                <Icon name="check-circle" size={20} color="#4CAF50" />
+                <Text style={styles.amenityText}>{amenity.equipment_name || 'Unnamed Equipment'}</Text>
+              </View>
+            ))}
           </View>
-
-          <TouchableOpacity onPress={toggleShowAll}>
-            <Text style={styles.showAllText}>{showAllAmenities ? 'Show Less' : 'Show All'}</Text>
+          <TouchableOpacity onPress={toggleAmenitiesPopup}>
+            <Text style={styles.showAllText}>Show All Amenities</Text>
           </TouchableOpacity>
         </View>
 
-      
-
-        {/* Additional spacing at the bottom */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Fixed Select Slot Button */}
       <TouchableOpacity style={styles.button} onPress={openSlotSelection}>
         <Text style={styles.buttonText}>Select Slot</Text>
       </TouchableOpacity>
 
-      {/* Modal for Image Zoom */}
       <Modal visible={isModalVisible} transparent={true} animationType="fade">
         <View style={styles.modalContainer}>
           <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
@@ -183,19 +149,16 @@ const GymDetailScreen = ({ navigation, route }) => {
         </View>
       </Modal>
 
-      {/* Slot Selection Modal */}
-      <Modal visible={isSlotSelectionVisible} transparent={true} animationType="slide">
-        <View style={styles.slotSelectionModal}>
-          <TouchableOpacity style={styles.closeButton} onPress={closeSlotSelection}>
-            <Text style={styles.closeButtonText}>✖️</Text>
-          </TouchableOpacity>
-          {/* Render slot selection screen */}
-          <SlotSelectionScreen navigation={navigation} gym={gymData} />
-        </View>
-      </Modal>
+      {/* Amenities List Popup */}
+      {showAmenitiesPopup && (
+        <AmenitiesListPopup gymId={gym_id} onClose={toggleAmenitiesPopup} />
+      )}
+
+      <Footer navigation={navigation} />
     </View>
   );
 };
+
 
 
 const styles = StyleSheet.create({
@@ -205,13 +168,16 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    padding: 20,
+    padding: 10, // Reduced padding for tighter spacing
   },
   scrollContent: {
-    paddingBottom: 100, // Space for the button
+    paddingBottom: 80, // Space for the button
   },
   headerContainer: {
-    marginBottom: 20,
+    marginBottom: 15, // Reduced margin for tighter spacing
+  },
+  imageContainer: {
+    position: 'relative', // Allow the dots to overlay on the image
   },
   imageScroll: {
     marginTop: 10,
@@ -222,9 +188,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   dotContainer: {
+    position: 'absolute',
+    bottom: 10, // Adjust position as needed
+    left: '50%',
+    transform: [{ translateX: -50 }],
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 10,
   },
   dot: {
     width: 10,
@@ -236,73 +204,94 @@ const styles = StyleSheet.create({
   activeDot: {
     backgroundColor: '#4CAF50',
   },
-  userName: {
-    color: '#000',
-    fontSize: 26,
-    fontWeight: 'bold',
+  welcomeText: {
+    color: '#4CAF50', // Added green color for welcome text
+    fontSize: 20, // Adjusted font size
+    fontWeight: 'bold', // Bold for welcome text
     marginBottom: 5,
+    fontFamily: 'Roboto', // Changed to Roboto for consistency
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: 'bold', // Bold for user name
+    marginBottom: 5,
+    fontFamily: 'Roboto', // Changed to Roboto
   },
   bookingPrompt: {
-    color: '#000',
-    fontSize: 18,
+    color: '#333', // Changed to dark grey for better contrast
+    fontSize: 16,
     marginBottom: 10,
+    fontFamily: 'Roboto', // Changed to Roboto
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    elevation: 3,
+    //backgroundColor: '#fff',
+    //borderRadius: 10,
+    padding: 20, // Reduced padding for tighter spacing
+    marginBottom: 15, // Reduced margin for tighter spacing
+    //elevation: 3,
   },
   gymName: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: 'bold', // Bold for gym name
+    color: '#4CAF50', // Green color for gym name
+    fontFamily: 'Roboto', // Changed to Roboto
+  },
+  gymDescription: {
+    fontSize: 14, // Adjusted font size to match the amenities list
+    color: '#333', // Changed to dark grey for consistency
+    fontFamily: 'Roboto', // Changed to Roboto
+    marginBottom: 5,
   },
   priceAvailabilityContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+    marginVertical: 5,
   },
-  price: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  city: {
+    fontSize: 14,
+    color: '#333', // Changed to dark grey
+    fontFamily: 'Roboto', // Changed to Roboto
+  },
+  amenitiesContainer: {
+    padding: 20,
+    //backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    marginTop: 10,
+    marginBottom: 20,
   },
   amenitiesTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#4CAF50',
   },
-  amenities: {
+  amenitiesList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'flex-start', // Make sure items align at the start
-    width: '100%', // Ensure it takes full width
+    justifyContent: 'space-between',
   },
-  amenity: {
-    fontSize: 16, // Larger font size
-    color: '#4CAF50', // Green color
+  amenityItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 10,
-    marginRight: 10, // Reduce marginRight to fit more items in one row
-    fontWeight: '500', // Semi-bold text
-    flexBasis: '30%', // Make each item take up around 30% of the row
+    width: '45%', // Adjust width to fit 2 items per row
+  },
+  amenityText: {
+    marginLeft: 5,
+    fontSize: 14,
+    color: '#333',
   },
   showAllText: {
-    color: '#1E90FF', // Brighter blue color to stand out
-    fontSize: 18, // Slightly larger font size
-    fontWeight: 'bold', // Make it bold
+    color: '#4CAF50',
+    fontWeight: 'bold',
     textAlign: 'center',
-    marginVertical: 20,
-    textDecorationLine: 'underline', // Underline for emphasis
-    letterSpacing: 1.5, // Add spacing between letters
-    fontFamily: 'Cochin', // Use a more elegant font (iOS) or set a custom one
-
+    marginTop: 10,
+    
   },
   bottomSpacing: {
-    height: 100, // Space for the button
+    height: 50, // Space for the button
   },
   button: {
     position: 'absolute',
-    bottom: 20, // Reduced bottom value to move the button up
+    bottom: 120, // Reduced bottom value to move the button up
     left: 20,
     right: 20,
     backgroundColor: '#4CAF50',
@@ -314,88 +303,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     fontWeight: 'bold',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalImage: {
-    width: '90%',
-    height: '90%',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-  },
-  closeButtonText: {
-    color: '#fff',
-    fontSize: 24,
-  },
-  slotSelectionModal: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  amenitiesContainer: {
-    marginVertical: 20,
-  },
-  amenitiesTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  amenities: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between', // Add space between items
-  },
-  amenityItem: {
-    backgroundColor: '#f8f8f8', // Light background for each item
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-    marginRight: 10,
-    width: '45%', // Adjust width to fit two items per row
-    alignItems: 'center', // Center icon and text
-    justifyContent: 'center',
-    elevation: 2, // Add shadow for elevation
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#e0e0e0', // Gray background for icons
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  icon: {
-    width: 24,
-    height: 24,
-  },
-  amenityText: {
-    fontSize: 16,
-    color: '#4CAF50', // Green color for amenity text
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  noAmenitiesText: {
-    fontSize: 16,
-    color: '#999',
-    textAlign: 'center',
-  },
-  showAllText: {
-    color: '#1E90FF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 10,
-    textDecorationLine: 'underline',
-  },
+  }
 });
 
 export default GymDetailScreen;
