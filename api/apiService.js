@@ -55,10 +55,9 @@ export const verifyOtp = async (mobileNumber, otp) => {
   };
 
 
-  export const fetchAllGyms = async () => {
+  export const fetchAllGyms = async (latitude=12.9716, longitude=77.5946) => {
     try {
-      const latitude = 12.9716; // Replace with actual latitude
-      const longitude = 77.5946; // Replace with actual longitude
+      
       const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
 
       const response = await axios.get(

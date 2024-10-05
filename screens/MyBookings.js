@@ -87,13 +87,13 @@ const MyBookings = () => {
                 <Text style={styles.bookingDate}>Date: {booking.bookingDate}</Text>
                 <Text style={styles.gymName}>{booking.gymName}</Text>
                 <Text style={styles.subscriptionPrice}>Price: ${booking.subscriptionPrice}</Text>
-                
+                <Text style={styles.subscriptionPrice}>Invited Buddy: {booking.invitedBuddyCount}</Text>
                 {/* Small text link to invite friends */}
-                {booking.invitedBuddyCount === "0" && (
+                  
                   <TouchableOpacity onPress={() => handleInviteFriends(booking.bookingId)}>
                     <Text style={styles.inviteLink}>Invite friends to join!</Text>
                   </TouchableOpacity>
-                )}
+             
               </View>
               <Image
                 source={{ uri: booking.gymImage }}
