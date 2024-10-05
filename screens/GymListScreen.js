@@ -58,7 +58,7 @@ export default function GymListScreen({ navigation }) {
     try {
       const response = await axios.get(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${long}&localityLanguage=en`);
       if (response.data) {
-        setAddress(response.data.city || response.data.locality || 'Location not found');
+        setAddress(response.data.city || response.data.locality || 'Unknown location');
       }
     } catch (error) {
       console.error('Error fetching address:', error);
@@ -85,9 +85,14 @@ export default function GymListScreen({ navigation }) {
       <Image source={{ uri: item.images?.[0]?.imageUrl || 'https://www.hussle.com/blog/wp-content/uploads/2020/12/Gym-structure-1080x675.png' }} style={styles.gymImage} />
       <View style={styles.gymInfo}>
         <Text style={styles.gymName}>{item.gymName}</Text>
+        <Text style={styles.gymDescription}>
+          {item.gymDescription ? item.gymDescription.substring(0, 100) + '...' : 'No description available'}
+        </Text>
         <Text style={styles.gymPrice}>₹ {item.subscriptionPrices?.[0] || 'N/A'}/session</Text>
         <Text style={styles.gymDistance}>📍 {(item.distance ? item.distance.toFixed(1) : 'N/A')} km</Text>
         <Text style={styles.gymRating}>⭐ {item.gymRating || 'N/A'}</Text>
+        {/* Display part of the description */}
+        
         <TouchableOpacity style={styles.bookNowButton} onPress={() => redirectToGymDetails(item.gymId)}>
           <Text style={styles.bookNowText}>
             <Icon name="check-circle" size={18} color="#fff" /> Book Now
@@ -221,6 +226,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#FFD700',
     marginBottom: 3,
+  },
+  gymDescription: {
+    fontSize: 12,
+    color: '#333',
+    marginBottom: 5,
   },
   bookNowButton: {
     backgroundColor: '#4CAF50',
