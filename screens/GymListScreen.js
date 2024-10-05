@@ -82,7 +82,7 @@ export default function GymListScreen({ navigation }) {
   // Render each gym
   const renderGym = ({ item }) => (
     <TouchableOpacity style={styles.gymCard} onPress={() => redirectToGymDetails(item.gymId)}>
-      <Image source={{ uri: item.images?.[0]?.imageUrl || 'https://via.placeholder.com/150' }} style={styles.gymImage} />
+      <Image source={{ uri: item.images?.[0]?.imageUrl || 'https://www.hussle.com/blog/wp-content/uploads/2020/12/Gym-structure-1080x675.png' }} style={styles.gymImage} />
       <View style={styles.gymInfo}>
         <Text style={styles.gymName}>{item.gymName}</Text>
         <Text style={styles.gymPrice}>₹ {item.subscriptionPrices?.[0] || 'N/A'}/session</Text>
