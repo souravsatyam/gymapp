@@ -16,11 +16,13 @@ import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import Footer from '../components/Footer';
+import axios from 'axios';
 
 export default function GymListScreen({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [gyms, setGyms] = useState([]);
-  const [currentLocation, setCurrentLocation] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState('');
+  const [address, setAddress] = useState('');
 
   // Function to fetch gyms based on latitude and longitude
   const fetchGyms = async (lat, long) => {
@@ -32,7 +34,7 @@ export default function GymListScreen({ navigation }) {
     }
   };
 
-  // Get current location
+  // Get current location and address
   const getLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -42,9 +44,8 @@ export default function GymListScreen({ navigation }) {
       }
 
       const location = await Location.getCurrentPositionAsync({});
-      console.log("location.coords", location.coords);
       fetchGyms(location.coords.latitude, location.coords.longitude);
-      setCurrentLocation(location.coords);
+      fetchAddress(location.coords.latitude, location.coords.longitude);
     } catch (error) {
       fetchGyms();
       console.error('Error getting location:', error);
@@ -52,8 +53,20 @@ export default function GymListScreen({ navigation }) {
     }
   };
 
+  // Fetch address based on latitude and longitude
+  const fetchAddress = async (lat, long) => {
+    try {
+      const response = await axios.get(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${long}&localityLanguage=en`);
+      if (response.data) {
+        setAddress(response.data.city || response.data.locality || 'Location not found');
+      }
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      setAddress('Error fetching address');
+    }
+  };
+
   useEffect(() => {
-     // Call the API when the component mounts
     getLocation(); // Get the current location when the component mounts
   }, []);
 
@@ -73,7 +86,7 @@ export default function GymListScreen({ navigation }) {
       <View style={styles.gymInfo}>
         <Text style={styles.gymName}>{item.gymName}</Text>
         <Text style={styles.gymPrice}>₹ {item.subscriptionPrices?.[0] || 'N/A'}/session</Text>
-        <Text style={styles.gymDistance}>📍 {item.distance || '1.2 km'}</Text>
+        <Text style={styles.gymDistance}>📍 {(item.distance ? item.distance.toFixed(1) : 'N/A')} km</Text>
         <Text style={styles.gymRating}>⭐ {item.gymRating || 'N/A'}</Text>
         <TouchableOpacity style={styles.bookNowButton} onPress={() => redirectToGymDetails(item.gymId)}>
           <Text style={styles.bookNowText}>
@@ -94,14 +107,12 @@ export default function GymListScreen({ navigation }) {
         <View style={styles.headerContent}>
           <View style={styles.locationContainer}>
             <Text style={styles.locationText}>
-              <MaterialIcon name="location-on" size={18} color="#fff" /> 
-              {currentLocation ? `Lat: ${currentLocation.latitude.toFixed(2)}, Lon: ${currentLocation.longitude.toFixed(2)}` : 'Fetching location...'}
+              <MaterialIcon name="location-on" size={20} color="#fff" /> 
+              {address || 'Fetching location...'}
             </Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('NotificationListScreen')}>
-            <Text>
-              <Icon name="bell" size={24} color="#fff" />
-            </Text>
+            <Icon name="bell" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
         <Text style={styles.greetingText}>Hey Deepak, looking for a gym or a workout buddy?</Text>
@@ -144,15 +155,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  addressDetails: {
-    marginLeft: 10,
+    flexDirection: 'column',
   },
   locationText: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#fff',
+    fontWeight: 'bold',
   },
   greetingText: {
     fontSize: 18,
