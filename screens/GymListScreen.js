@@ -11,7 +11,7 @@ import {
   Platform,
   Alert 
 } from 'react-native';
-import { fetchAllGyms } from '../api/apiService';
+import { fetchAllGyms } from '../api/apiService';  // Assumed to be paginated (limit & page supported)
 import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
@@ -23,14 +23,27 @@ export default function GymListScreen({ navigation }) {
   const [gyms, setGyms] = useState([]);
   const [currentLocation, setCurrentLocation] = useState('');
   const [address, setAddress] = useState('');
+  const [page, setPage] = useState(1); // Initialize page number
+  const [loading, setLoading] = useState(false); // For loading spinner
+  const [hasMoreGyms, setHasMoreGyms] = useState(true); // To stop fetching if no more data
 
-  // Function to fetch gyms based on latitude, longitude, and search text (if any)
-  const fetchGyms = async (lat, long, searchText = '') => {
+  const limit = 9; // Number of gyms per page
+
+  // Fetch gyms based on latitude, longitude, search text, page, and limit
+  const fetchGyms = async (lat, long, searchText = '', page = 1) => {
+    if (loading || !hasMoreGyms) return; // Prevent further fetching if already loading or no more gyms
+    setLoading(true);
     try {
-      const gymList = await fetchAllGyms(lat, long, searchText);
-      setGyms(gymList);
+      const gymList = await fetchAllGyms(lat, long, searchText, limit, page);
+      if (gymList.length > 0) {
+        setGyms(prevGyms => [...prevGyms, ...gymList]); // Append gyms to the existing list
+      } else {
+        setHasMoreGyms(false); // No more gyms to load
+      }
     } catch (error) {
       console.error('Error fetching gyms:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,8 +57,7 @@ export default function GymListScreen({ navigation }) {
       }
 
       const location = await Location.getCurrentPositionAsync({});
-      console.log("Fetched SearchEd Tesxt", searchText);
-      fetchGyms(location.coords.latitude, location.coords.longitude, searchText); // Pass searchText if it exists
+      fetchGyms(location.coords.latitude, location.coords.longitude, searchText, page); // Pass searchText and initial page
       fetchAddress(location.coords.latitude, location.coords.longitude);
     } catch (error) {
       fetchGyms(); // Fetch gyms without location if location access fails
@@ -69,12 +81,17 @@ export default function GymListScreen({ navigation }) {
 
   useEffect(() => {
     getLocation(); // Get the current location when the component mounts
-  }, [searchText]); // Add searchText as a dependency to update gyms based on search
+  }, [searchText, page]); // Update gyms based on searchText
 
-  // Filter gyms based on search input (this will be automatically updated from fetchGyms)
-  const filteredGyms = gyms?.filter(gym =>
-    gym.gymName.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // Triggered when the user scrolls to the end of the list to fetch the next page
+  const loadMoreGyms = () => {
+    console.log("Load More Gyms");
+    if (hasMoreGyms && !loading) {
+      setPage(prevPage => prevPage + 1); // Increment the page number
+    }
+  };
+
+  
 
   const redirectToGymDetails = (gymId) => {
     navigation.navigate('GymDetails', { gym_id: gymId });
@@ -131,15 +148,19 @@ export default function GymListScreen({ navigation }) {
 
       {/* Display filtered gyms */}
       <FlatList
-        data={filteredGyms}
+        data={gyms}
         keyExtractor={(item) => item.gymId}
         renderItem={renderGym}
         contentContainerStyle={styles.gymList}
+        onEndReached={loadMoreGyms} // Load more gyms when scrolling
+        onEndReachedThreshold={0.6} // Trigger when 50% away from the end
+        ListFooterComponent={loading ? <Text>Loading more gyms...</Text> : null} // Loading indicator
       />
       <Footer navigation={navigation} />
     </KeyboardAvoidingView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
