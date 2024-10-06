@@ -24,10 +24,10 @@ export default function GymListScreen({ navigation }) {
   const [currentLocation, setCurrentLocation] = useState('');
   const [address, setAddress] = useState('');
 
-  // Function to fetch gyms based on latitude and longitude
-  const fetchGyms = async (lat, long) => {
+  // Function to fetch gyms based on latitude, longitude, and search text (if any)
+  const fetchGyms = async (lat, long, searchText = '') => {
     try {
-      const gymList = await fetchAllGyms(lat, long);
+      const gymList = await fetchAllGyms(lat, long, searchText);
       setGyms(gymList);
     } catch (error) {
       console.error('Error fetching gyms:', error);
@@ -44,10 +44,11 @@ export default function GymListScreen({ navigation }) {
       }
 
       const location = await Location.getCurrentPositionAsync({});
-      fetchGyms(location.coords.latitude, location.coords.longitude);
+      console.log("Fetched SearchEd Tesxt", searchText);
+      fetchGyms(location.coords.latitude, location.coords.longitude, searchText); // Pass searchText if it exists
       fetchAddress(location.coords.latitude, location.coords.longitude);
     } catch (error) {
-      fetchGyms();
+      fetchGyms(); // Fetch gyms without location if location access fails
       console.error('Error getting location:', error);
       Alert.alert('Error', 'Could not retrieve location. Please try again later.');
     }
@@ -68,9 +69,9 @@ export default function GymListScreen({ navigation }) {
 
   useEffect(() => {
     getLocation(); // Get the current location when the component mounts
-  }, []);
+  }, [searchText]); // Add searchText as a dependency to update gyms based on search
 
-  // Filter gyms based on search input
+  // Filter gyms based on search input (this will be automatically updated from fetchGyms)
   const filteredGyms = gyms?.filter(gym =>
     gym.gymName.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -91,8 +92,6 @@ export default function GymListScreen({ navigation }) {
         <Text style={styles.gymPrice}>₹ {item.subscriptionPrices?.[0] || 'N/A'}/session</Text>
         <Text style={styles.gymDistance}>📍 {(item.distance ? item.distance.toFixed(1) : 'N/A')} km</Text>
         <Text style={styles.gymRating}>⭐ {item.gymRating || 'N/A'}</Text>
-        {/* Display part of the description */}
-        
         <TouchableOpacity style={styles.bookNowButton} onPress={() => redirectToGymDetails(item.gymId)}>
           <Text style={styles.bookNowText}>
             <Icon name="check-circle" size={18} color="#fff" /> Book Now
@@ -126,7 +125,7 @@ export default function GymListScreen({ navigation }) {
           placeholder="Search nearby gyms"
           placeholderTextColor="#ccc"
           value={searchText}
-          onChangeText={setSearchText}
+          onChangeText={setSearchText} // Update searchText state
         />
       </View>
 
