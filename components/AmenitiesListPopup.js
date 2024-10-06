@@ -1,8 +1,11 @@
+// components/AmenitiesListPopup.js
+
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { fetchIndividualGymData } from '../api/apiService'; // Adjust the import path as needed
+import Svg, { Path } from 'react-native-svg';
 
-const AmenitiesListScreen = ({ gymId, onClose }) => {
+const AmenitiesListPopup = ({ gymId, onClose }) => {
   const [amenities, setAmenities] = React.useState([]);
 
   React.useEffect(() => {
@@ -18,6 +21,31 @@ const AmenitiesListScreen = ({ gymId, onClose }) => {
     fetchAmenities();
   }, [gymId]);
 
+  const renderSvg = (svgString) => {
+    const regex = /<svg[^>]*>(.*?)<\/svg>/s; // Regex to extract SVG content
+    const match = svgString.match(regex);
+
+    if (match) {
+      const svgContent = match[1];
+      const pathRegex = /<path[^>]*\/?>/g; // Extract paths from the SVG
+      const paths = svgContent.match(pathRegex);
+
+      if (paths) {
+        return paths.map((path, index) => {
+          const attributes = path.match(/(\w+)="([^"]*)"/g) || []; // Extract attributes
+          const props = {};
+          attributes.forEach(attr => {
+            const [key, value] = attr.split('=');
+            props[key] = value.replace(/"/g, '');
+          });
+          return <Path key={index} {...props} />;
+        });
+      }
+    }
+
+    return null;
+  };
+
   return (
     <View style={styles.overlay}>
       <View style={styles.container}>
@@ -29,6 +57,11 @@ const AmenitiesListScreen = ({ gymId, onClose }) => {
           {amenities.length > 0 ? (
             amenities.map((amenity, index) => (
               <View key={index} style={styles.amenityItem}>
+                <View style={styles.iconContainer}>
+                  <Svg height="24" width="24" style={styles.icon}>
+                    {renderSvg(amenity.equipment_icon_svg)}
+                  </Svg>
+                </View>
                 <Text style={styles.amenityText}>{amenity.equipment_name || 'Unnamed Equipment'}</Text>
               </View>
             ))
@@ -76,6 +109,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconContainer: {
+    marginRight: 10,
   },
   amenityText: {
     fontSize: 16,
@@ -89,5 +127,4 @@ const styles = StyleSheet.create({
   },
 });
 
-
-export default AmenitiesListScreen;
+export default AmenitiesListPopup;
