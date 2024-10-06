@@ -2,8 +2,9 @@
 
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system';
 
-const BASE_URL = 'https://baa5-2406-7400-94-d9e1-89c0-885c-a318-e98c.ngrok-free.app/user/api'; // Change to HTTP for testing
+const BASE_URL = 'https://1134-2406-7400-94-d9e1-8db1-6fd0-2fde-52c3.ngrok-free.app/user/api'; // Change to HTTP for testing
 
 // Function to handle login
 export const loginUser = async (phoneNumber) => {
@@ -55,13 +56,11 @@ export const verifyOtp = async (mobileNumber, otp) => {
   };
 
 
-  export const fetchAllGyms = async (latitude=12.9716, longitude=77.5946) => {
+  export const fetchAllGyms = async (latitude = 12.9716, longitude = 77.5946, limit = 9, page = 1) => {
     try {
-      
       const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
-
       const response = await axios.get(
-        `${BASE_URL}/gym/get?lat=${latitude}&long=${longitude}`,
+        `${BASE_URL}/gym/get?lat=${latitude}&long=${longitude}&limit=${limit}&page=${page}`,
         { headers: { Authorization: `Bearer ${userToken}` } } // Add token if required
       );
       
@@ -72,6 +71,7 @@ export const verifyOtp = async (mobileNumber, otp) => {
       console.error('Error fetching gyms:', error);
     }
   };
+  
 
   export const fetchIndividualGymData = async (gym_id) => {
     try {
@@ -305,5 +305,44 @@ export const inviteBuddyRequest = async (bookingId, toUserId) => {
   } catch (error) {
     console.error('Error inviting buddy:', error);
     Alert.alert('Error', 'An error occurred while sending the invitation.');
+  }
+};
+
+export const uploadProfileImage = async (imageUri) => {
+ 
+  const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+
+  // Convert image URI to a base64 string (optional, depends on your API design)
+  const base64Image = await FileSystem.readAsStringAsync(imageUri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+
+  // Prepare form data for the POST request
+  const formData = new FormData();
+  formData.append('profileImage', {
+    uri: imageUri,
+    name: 'profile.jpg', // Adjust as necessary
+    type: 'image/jpeg', // Adjust based on your image type
+  });
+
+  try {
+    const response = await axios.post(`${BASE_URL}/users/uploadProfileImage`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        "Authorization": `Bearer ${userToken}`, // Make sure to replace <your_token> with the actual token
+      },
+    });
+
+    // Handle the response
+    console.log("Profile imahe request received", response.data);
+    if (response.status === 200) {
+      console.log('Profile image uploaded successfully:', response.data);
+      return response.data; // Return the response if needed
+    } else {
+      throw new Error('Image upload failed');
+    }
+  } catch (error) {
+    console.error('Error uploading profile image:', error);
+    throw error; // Rethrow to handle in the calling function
   }
 };

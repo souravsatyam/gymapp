@@ -18,6 +18,8 @@
     "axios": "^1.7.7",
     "collection-view": "^1.0.0",
     "expo": "~51.0.35",
+    "expo-file-system": "^17.0.1",
+    "expo-image-picker": "^15.0.7",
     "expo-location": "^17.0.1",
     "expo-status-bar": "~1.12.1",
     "https": "^1.0.0",

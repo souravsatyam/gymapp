@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Modal, Dimensions } from 'react-native'; // Import Dimensions
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Modal, Dimensions, Linking  } from 'react-native'; // Import Dimensions
 import { fetchIndividualGymData } from '../api/apiService';
 import SlotSelectionScreen from './SlotSelectionScreen';
 import AmenitiesListPopup from '../components/AmenitiesListPopup';
@@ -58,6 +58,11 @@ const GymDetailScreen = ({ navigation, route }) => {
 
   const toggleAmenitiesPopup = () => {
     setShowAmenitiesPopup(!showAmenitiesPopup);
+  };
+
+  const openGoogleMaps = (latitude, longitude) => {
+    const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
+    Linking.openURL(url).catch((err) => console.error('Error opening Google Maps:', err));
   };
 
   if (!gymData) {
@@ -143,6 +148,19 @@ const GymDetailScreen = ({ navigation, route }) => {
           </View>
           <TouchableOpacity onPress={toggleAmenitiesPopup}>
             <Text style={styles.showAllText}>Show All Amenities</Text>
+          </TouchableOpacity>
+        </View>
+
+         {/* Map Marker Section */}
+         <View style={styles.mapMarkerContainer}>
+          <Text style={styles.mapMarkerText}>Location:</Text>
+          {console.log("gymData", gymData)}
+          <TouchableOpacity
+            style={styles.mapButton}
+            onPress={() => openGoogleMaps(gymData.latitude, gymData.longitude)} // Call the map redirection
+          >
+            <Icon name="map-marker" size={30} color="#4CAF50" />
+            <Text style={styles.mapButtonText}>View on Map</Text>
           </TouchableOpacity>
         </View>
 
@@ -354,6 +372,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 10,
     textAlign: 'center',
+  },
+  mapMarkerContainer: {
+    padding: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  mapMarkerText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  mapButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  mapButtonText: {
+    fontSize: 18,
+    color: '#4CAF50',
+    marginLeft: 5,
   },
 });
 
