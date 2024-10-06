@@ -196,6 +196,7 @@ const GymDetailScreen = ({ navigation, route }) => {
           <SlotSelectionScreen navigation={navigation} gym={gymData} />
         </View>
       </Modal>
+      
     </View>
   );
 };

@@ -1,36 +1,52 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  Image, 
-  StyleSheet, 
-  TouchableOpacity, 
-  TextInput, 
-  KeyboardAvoidingView, 
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
   Platform,
-  Alert 
+  Alert
 } from 'react-native';
-import { fetchAllGyms } from '../api/apiService';
+import { fetchAllGyms } from '../api/apiService';  // Assumed to be paginated (limit & page supported)
 import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import Footer from '../components/Footer';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 export default function GymListScreen({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [gyms, setGyms] = useState([]);
   const [currentLocation, setCurrentLocation] = useState('');
   const [address, setAddress] = useState('');
+  const [page, setPage] = useState(1); // Initialize page number
+  const [loading, setLoading] = useState(false); // For loading spinner
+  const [hasMoreGyms, setHasMoreGyms] = useState(true); // To stop fetching if no more data
+  const [fullName, setFullName] = useState(''); // State for user's full name
 
-  // Function to fetch gyms based on latitude, longitude, and search text (if any)
-  const fetchGyms = async (lat, long, searchText = '') => {
+  const limit = 9; // Number of gyms per page
+
+  // Fetch gyms based on latitude, longitude, search text, page, and limit
+  const fetchGyms = async (lat, long, searchText = '', page = 1) => {
+    if ((loading || !hasMoreGyms) && !searchText) return; // Prevent further fetching if already loading or no more gyms
+    setLoading(true);
     try {
-      const gymList = await fetchAllGyms(lat, long, searchText);
-      setGyms(gymList);
+      const gymList = await fetchAllGyms(lat, long, searchText, limit, page);
+
+      if (gymList.length > 0) {
+        setGyms(gymList); // Append gyms to the existing list
+      }  else {
+        setHasMoreGyms(false); // No more gyms to load
+      }
     } catch (error) {
       console.error('Error fetching gyms:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,8 +60,7 @@ export default function GymListScreen({ navigation }) {
       }
 
       const location = await Location.getCurrentPositionAsync({});
-      console.log("Fetched SearchEd Tesxt", searchText);
-      fetchGyms(location.coords.latitude, location.coords.longitude, searchText); // Pass searchText if it exists
+      fetchGyms(location.coords.latitude, location.coords.longitude, searchText, page); // Pass searchText and initial page
       fetchAddress(location.coords.latitude, location.coords.longitude);
     } catch (error) {
       fetchGyms(); // Fetch gyms without location if location access fails
@@ -67,14 +82,31 @@ export default function GymListScreen({ navigation }) {
     }
   };
 
+  // Fetch user's full name from AsyncStorage
+  const fetchUserName = async () => {
+    try {
+      const user = await AsyncStorage.getItem('user'); // Assuming user info is stored in 'user'
+      if (user) {
+        const userInfo = JSON.parse(user);
+        setFullName(userInfo.full_name || ''); // Update full name
+      }
+    } catch (error) {
+      console.error('Error fetching user name:', error);
+    }
+  };
+
   useEffect(() => {
     getLocation(); // Get the current location when the component mounts
-  }, [searchText]); // Add searchText as a dependency to update gyms based on search
+    fetchUserName(); // Fetch user's full name
+  }, [searchText]); // Update gyms based on searchText
 
-  // Filter gyms based on search input (this will be automatically updated from fetchGyms)
-  const filteredGyms = gyms?.filter(gym =>
-    gym.gymName.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // Triggered when the user scrolls to the end of the list to fetch the next page
+  const loadMoreGyms = () => {
+    console.log("Load More Gyms");
+    if (hasMoreGyms && !loading) {
+      setPage(prevPage => prevPage + 1); // Increment the page number
+    }
+  };
 
   const redirectToGymDetails = (gymId) => {
     navigation.navigate('GymDetails', { gym_id: gymId });
@@ -102,8 +134,8 @@ export default function GymListScreen({ navigation }) {
   );
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* Custom header with greeting and search bar */}
@@ -111,7 +143,7 @@ export default function GymListScreen({ navigation }) {
         <View style={styles.headerContent}>
           <View style={styles.locationContainer}>
             <Text style={styles.locationText}>
-              <MaterialIcon name="location-on" size={20} color="#fff" /> 
+              <MaterialIcon name="location-on" size={20} color="#fff" />
               {address || 'Fetching location...'}
             </Text>
           </View>
@@ -119,7 +151,7 @@ export default function GymListScreen({ navigation }) {
             <Icon name="bell" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.greetingText}>Hey Deepak, looking for a gym or a workout buddy?</Text>
+        <Text style={styles.greetingText}>Hey {fullName}, looking for a gym or a workout buddy?</Text>
         <TextInput
           style={styles.searchInput}
           placeholder="Search nearby gyms"
@@ -131,10 +163,13 @@ export default function GymListScreen({ navigation }) {
 
       {/* Display filtered gyms */}
       <FlatList
-        data={filteredGyms}
+        data={gyms}
         keyExtractor={(item) => item.gymId}
         renderItem={renderGym}
         contentContainerStyle={styles.gymList}
+        onEndReached={loadMoreGyms} // Load more gyms when scrolling
+        onEndReachedThreshold={0.6} // Trigger when 50% away from the end
+        ListFooterComponent={loading ? <Text>Loading more gyms...</Text> : null} // Loading indicator
       />
       <Footer navigation={navigation} />
     </KeyboardAvoidingView>
@@ -174,74 +209,62 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   searchInput: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 10,
-    color: '#000',
-    fontSize: 14,
-    borderColor: '#ccc',
     borderWidth: 1,
-    marginTop: 10,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: '#fff',
   },
   gymList: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingBottom: 80, // Add some padding at the bottom
   },
   gymCard: {
+    flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 15,
-    marginBottom: 20,
-    overflow: 'hidden',
-    elevation: 3,
-  },
-  gymImage: {
-    width: '100%',
-    height: 180,
-    resizeMode: 'cover',
-  },
-  gymInfo: {
+    borderRadius: 10,
+    elevation: 2,
+    margin: 10,
     padding: 10,
   },
+  gymImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
+  gymInfo: {
+    marginLeft: 10,
+    flex: 1,
+  },
   gymName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  gymDescription: {
+    fontSize: 14,
+    color: '#777',
+  },
+  gymPrice: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#4CAF50',
-    marginBottom: 5,
-    textAlign: 'left',
-  },
-  gymPrice: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#e76f51',
-    marginBottom: 5,
-    textAlign: 'left',
   },
   gymDistance: {
-    fontSize: 12,
-    color: '#555',
-    marginBottom: 5,
+    fontSize: 14,
+    color: '#777',
   },
   gymRating: {
-    fontSize: 12,
-    color: '#FFD700',
-    marginBottom: 3,
-  },
-  gymDescription: {
-    fontSize: 12,
-    color: '#333',
-    marginBottom: 5,
+    fontSize: 14,
+    color: '#777',
   },
   bookNowButton: {
     backgroundColor: '#4CAF50',
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
+    borderRadius: 10,
+    padding: 10,
+    alignItems: 'center',
     marginTop: 10,
-    alignSelf: 'flex-end',
   },
   bookNowText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 14,
   },
 });

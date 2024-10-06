@@ -17,6 +17,7 @@ import SlotSelectionScreen from './screens/SlotSelectionScreen';
 import PaymentScreen from './screens/PaymentConfirm';
 import ConfirmationScreen from './screens/ConfirmationScreen';
 import InviteFriendBuddiesScreen from './screens/InviteFriendsBuddies';
+import SettingsScreen from './screens/SettingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -40,6 +41,7 @@ export default function App() {
         <Stack.Screen name="SlotSelectionScreen" component={SlotSelectionScreen} />
         <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
         <Stack.Screen name="InviteFriendBuddy" component={InviteFriendBuddiesScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>

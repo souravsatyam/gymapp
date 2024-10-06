@@ -58,18 +58,20 @@ export const verifyOtp = async (mobileNumber, otp) => {
 
   export const fetchAllGyms = async (latitude = 12.9716, longitude = 77.5946,  searchText='', limit = 9, page = 1) => {
     try {
-      console.log("Search TExt are", searchText);
+  
       const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
       const response = await axios.get(
         `${BASE_URL}/gym/get?lat=${latitude}&long=${longitude}&limit=${limit}&page=${page}&search=${searchText}`,
         { headers: { Authorization: `Bearer ${userToken}` } } // Add token if required
       );
       
+      console.log("Response data strattus", response.data);
       if (response.data.status) {
         return response.data.gyms;
       }
     } catch (error) {
-      console.error('Error fetching gyms:', error);
+      console.error('Error fetching gyms:', error)
+
     }
   };
   
@@ -170,7 +172,7 @@ export const verifyOtp = async (mobileNumber, otp) => {
 
 
   export const createBooking = async (slotDetails) => {
-    console.log("slotDetails.date", slotDetails.date);
+   
     try {
    
         const [month, day, year] = slotDetails.date.split('/'); // Split by '/' 
@@ -400,3 +402,22 @@ export const getUserImage = async (userId, page = 1) => {
     throw error; // Rethrow the error for further handling
 }
 }
+
+
+export const createOrder = async (amount) => {
+  try {
+    const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+    const response = await axios.post(`${BASE_URL}/booking/initiate`, {
+      amount: amount, // Send the amount to your backend (e.g., 500 for INR 500)
+    },{
+      headers: {
+        Authorization: `Bearer ${userToken}`,  // Add the Bearer token here
+      },
+    });
+    
+    return response.data; // This should include the Razorpay order_id, amount, currency, etc.
+  } catch (error) {
+    console.log('Error creating order:', error);
+    throw error; // Handle error accordingly
+  }
+};
