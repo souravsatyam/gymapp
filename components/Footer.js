@@ -6,22 +6,22 @@ const Footer = ({ navigation }) => {
   return (
     <View style={styles.footer}>
       <TouchableOpacity onPress={() => navigation.navigate('GymList')} style={styles.iconContainer}>
-        <Icon name="home" size={24} color="#fff" />
+        <Icon name="home" size={24} color="#1c1c1c" />
         <Text style={styles.iconText}>Home</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('InviteBuddy')} style={styles.iconContainer}>
-        <Icon name="search" size={24} color="#fff" />
+        <Icon name="search" size={24} color="#1c1c1c" />
         <Text style={styles.iconText}>Search</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('MyBookings')} style={styles.iconContainer}>
-        <Icon name="calendar" size={24} color="#fff" />
+        <Icon name="calendar" size={24} color="#1c1c1c" />
         <Text style={styles.iconText}>Bookings</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.iconContainer}>
-        <Icon name="user" size={24} color="#fff" />
+        <Icon name="user" size={24} color="#1c1c1c" />
         <Text style={styles.iconText}>Profile</Text>
       </TouchableOpacity>
     </View>
@@ -34,9 +34,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     height: 60,
-    backgroundColor: '#1c1c1c',
+    backgroundColor: '#ffffff', // Change background to white
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
+    borderTopColor: '#e0e0e0', // Lighter border color
     elevation: 5, // Add a shadow effect for Android
     shadowColor: '#000', // Shadow for iOS
     shadowOffset: { width: 0, height: 2 },
@@ -45,11 +45,11 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     alignItems: 'center',
-    padding: 8, // Add padding for better touch area
+    padding: 10, // Add padding for better touch area
   },
   iconText: {
-    color: '#fff',
-    fontSize: 12,
+    color: '#1c1c1c', // Change text color to a darker shade for contrast
+    fontSize: 14, // Slightly increase font size
     marginTop: 4, // Space between icon and text
   },
 });
