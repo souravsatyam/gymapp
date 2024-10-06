@@ -4,7 +4,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 
-const BASE_URL = 'https://1134-2406-7400-94-d9e1-8db1-6fd0-2fde-52c3.ngrok-free.app/user/api'; // Change to HTTP for testing
+const BASE_URL = 'https://e4d1-2401-4900-62a8-3413-15e6-4cb6-cd57-d10d.ngrok-free.app/user/api'; // Change to HTTP for testing
 
 // Function to handle login
 export const loginUser = async (phoneNumber) => {
@@ -114,6 +114,7 @@ export const verifyOtp = async (mobileNumber, otp) => {
       const formattedBuddies = data.map(user => ({
         id: user.id,
         name: user.full_name,
+        username: user.username,
         status: user.is_selected ? 'Available' : 'Unavailable',
         image: user.profile_pic || 'https://via.placeholder.com/50', // Use a placeholder if no image
         inGym: user.is_selected,

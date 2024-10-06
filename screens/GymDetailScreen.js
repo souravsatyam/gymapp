@@ -83,7 +83,7 @@ const GymDetailScreen = ({ navigation, route }) => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerContainer}>
-          <Text style={styles.welcomeText}>Welcome back!</Text>
+          {/* <Text style={styles.welcomeText}>Welcome back!</Text> */}
           <Text style={styles.userName}>Deepak Parmar</Text>
           <Text style={styles.bookingPrompt}>Want to book your gym sessions with just a tap?</Text>
 
@@ -153,14 +153,14 @@ const GymDetailScreen = ({ navigation, route }) => {
 
          {/* Map Marker Section */}
          <View style={styles.mapMarkerContainer}>
-          <Text style={styles.mapMarkerText}>Location:</Text>
+          <Text style={styles.mapMarkerText}>View on map</Text>
           {console.log("gymData", gymData)}
           <TouchableOpacity
             style={styles.mapButton}
             onPress={() => openGoogleMaps(gymData.latitude, gymData.longitude)} // Call the map redirection
           >
             <Icon name="map-marker" size={30} color="#4CAF50" />
-            <Text style={styles.mapButtonText}>View on Map</Text>
+            {/* <Text style={styles.mapButtonText}>View on Map</Text> */}
           </TouchableOpacity>
         </View>
 
@@ -203,7 +203,7 @@ const GymDetailScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    //backgroundColor: '#fff',
   },
   scrollView: {
     flex: 1,
@@ -255,6 +255,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
     fontFamily: 'Roboto',
+    color: '#4CAF50',
+
   },
   bookingPrompt: {
     color: '#333',
@@ -358,8 +360,8 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   closeButtonText: {
-    fontSize: 30,
-    color: '#fff',
+    fontSize: 20, // Reduced size from 30 to 24
+    color: '#4CAF50', // Changed color to green
   },
   slotSelectionModal: {
     flex: 1,
@@ -378,13 +380,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
     borderRadius: 10,
     marginTop: 10,
+    fontSize: 18,
+
+
   },
   mapMarkerText: {
     fontSize: 18,
     fontWeight: 'bold',
+    fontSize: 18,
+    color :'#4CAF50'
+
   },
   mapButton: {
     flexDirection: 'row',
