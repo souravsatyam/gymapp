@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  Image, 
-  StyleSheet, 
-  TouchableOpacity, 
-  TextInput, 
-  KeyboardAvoidingView, 
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
   Platform,
-  Alert 
+  Alert
 } from 'react-native';
 import { fetchAllGyms } from '../api/apiService';  // Assumed to be paginated (limit & page supported)
 import * as Location from 'expo-location';
@@ -33,13 +33,14 @@ export default function GymListScreen({ navigation }) {
 
   // Fetch gyms based on latitude, longitude, search text, page, and limit
   const fetchGyms = async (lat, long, searchText = '', page = 1) => {
-    if (loading || !hasMoreGyms) return; // Prevent further fetching if already loading or no more gyms
+    if ((loading || !hasMoreGyms) && !searchText) return; // Prevent further fetching if already loading or no more gyms
     setLoading(true);
     try {
       const gymList = await fetchAllGyms(lat, long, searchText, limit, page);
+
       if (gymList.length > 0) {
-        setGyms(prevGyms => [...prevGyms, ...gymList]); // Append gyms to the existing list
-      } else {
+        setGyms(gymList); // Append gyms to the existing list
+      }  else {
         setHasMoreGyms(false); // No more gyms to load
       }
     } catch (error) {
@@ -97,7 +98,7 @@ export default function GymListScreen({ navigation }) {
   useEffect(() => {
     getLocation(); // Get the current location when the component mounts
     fetchUserName(); // Fetch user's full name
-  }, [searchText, page]); // Update gyms based on searchText
+  }, [searchText]); // Update gyms based on searchText
 
   // Triggered when the user scrolls to the end of the list to fetch the next page
   const loadMoreGyms = () => {
@@ -133,8 +134,8 @@ export default function GymListScreen({ navigation }) {
   );
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* Custom header with greeting and search bar */}
@@ -142,7 +143,7 @@ export default function GymListScreen({ navigation }) {
         <View style={styles.headerContent}>
           <View style={styles.locationContainer}>
             <Text style={styles.locationText}>
-              <MaterialIcon name="location-on" size={20} color="#fff" /> 
+              <MaterialIcon name="location-on" size={20} color="#fff" />
               {address || 'Fetching location...'}
             </Text>
           </View>
