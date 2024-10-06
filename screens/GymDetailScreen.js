@@ -127,11 +127,21 @@ const GymDetailScreen = ({ navigation, route }) => {
               {isDescriptionExpanded ? 'Show Less' : 'Show More'}
             </Text>
           </TouchableOpacity>
+          
         </View>
 
         <View style={styles.card}>
           <View style={styles.priceAvailabilityContainer}>
+          <View style={styles.cityContainer}>
+
             <Text style={styles.city}>City: {gymData.city}</Text>
+            <TouchableOpacity
+                style={styles.mapButton}
+                onPress={() => openGoogleMaps(gymData.latitude, gymData.longitude)} // Call the map redirection
+              >
+                <Icon name="map-marker" size={30} color="#4CAF50" />
+              </TouchableOpacity>
+              </View>
           </View>
         </View>
 
@@ -151,18 +161,7 @@ const GymDetailScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
 
-         {/* Map Marker Section */}
-         <View style={styles.mapMarkerContainer}>
-          <Text style={styles.mapMarkerText}>View on map</Text>
-          {console.log("gymData", gymData)}
-          <TouchableOpacity
-            style={styles.mapButton}
-            onPress={() => openGoogleMaps(gymData.latitude, gymData.longitude)} // Call the map redirection
-          >
-            <Icon name="map-marker" size={30} color="#4CAF50" />
-            {/* <Text style={styles.mapButtonText}>View on Map</Text> */}
-          </TouchableOpacity>
-        </View>
+         
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
@@ -276,6 +275,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto',
     marginTop: 10, // Space between image and gym name
   },
+  mapButton: {
+    marginLeft: 10
+  },
   gymDescription: {
     fontSize: 14,
     color: '#333',
@@ -285,6 +287,10 @@ const styles = StyleSheet.create({
   priceAvailabilityContainer: {
     marginVertical: 5,
   },
+cityContainer: {
+  flexDirection: 'row',  // Ensures icon and text are in the same row
+  alignItems: 'center',  // Vertically centers the content
+},
   city: {
     fontSize: 14,
     color: '#333',
@@ -376,33 +382,33 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
   },
-  mapMarkerContainer: {
-    padding: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderRadius: 10,
-    marginTop: 10,
-    fontSize: 18,
+  // mapMarkerContainer: {
+  //   padding: 15,
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-between',
+  //   alignItems: 'center',
+  //   borderRadius: 10,
+  //   marginTop: 10,
+  //   fontSize: 18,
 
 
-  },
-  mapMarkerText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontSize: 18,
-    color :'#4CAF50'
+  // },
+  // mapMarkerText: {
+  //   fontSize: 18,
+  //   fontWeight: 'bold',
+  //   fontSize: 18,
+  //   color :'#4CAF50'
 
-  },
-  mapButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  mapButtonText: {
-    fontSize: 18,
-    color: '#4CAF50',
-    marginLeft: 5,
-  },
+  // },
+  // mapButton: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  // },
+  // mapButtonText: {
+  //   fontSize: 18,
+  //   color: '#4CAF50',
+  //   marginLeft: 5,
+  // },
 });
 
 export default GymDetailScreen;
