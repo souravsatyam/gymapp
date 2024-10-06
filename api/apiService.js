@@ -346,3 +346,55 @@ export const uploadProfileImage = async (imageUri) => {
     throw error; // Rethrow to handle in the calling function
   }
 };
+
+
+
+
+
+
+export const uploadImages = async (imageUri) => {
+ 
+  const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+
+  // Convert image URI to a base64 string (optional, depends on your API design)
+  const base64Image = await FileSystem.readAsStringAsync(imageUri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+
+  // Prepare form data for the POST request
+  const formData = new FormData();
+  formData.append('postImage', {
+    uri: imageUri,
+    name: 'profile.jpg', // Adjust as necessary
+    type: 'image/jpeg', // Adjust based on your image type
+  });
+
+  try {
+    const response = await axios.post(`${BASE_URL}/users/uploadImage`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        "Authorization": `Bearer ${userToken}`, // Make sure to replace <your_token> with the actual token
+      },
+    });
+
+    // Handle the response
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading profile image:', error);
+    throw error; // Rethrow to handle in the calling function
+  }
+};
+
+export const getUserImage = async (userId, page = 1) => {
+  try {
+    const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+    const response = await axios.get(`${BASE_URL}/users/getImage/${userId}`, {
+        "params": { page },
+        headers: {"Authorization": `Bearer ${userToken}`}, // Make sure to replace <your_token> with the actual token
+    });
+    return response.data; // Returns the data from the response
+} catch (error) {
+    console.error('Error fetching user images:', error);
+    throw error; // Rethrow the error for further handling
+}
+}

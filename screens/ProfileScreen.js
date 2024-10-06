@@ -18,11 +18,12 @@ import {
   uploadProfileImage,
   fetchUploadedImages,
   uploadImages,
+  getUserImage,
 } from '../api/apiService'; // Ensure you have the correct path
 
 const ProfileScreen = ({ navigation }) => {
   const [profileImage, setProfileImage] = useState('https://via.placeholder.com/150');
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState([]); // Change to an array to hold multiple images
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -31,8 +32,10 @@ const ProfileScreen = ({ navigation }) => {
     const fetchUserData = async () => {
       try {
         const data = await userDetails();
+        console.log("User Profile Information received", data);
         setUserData(data);
         setProfileImage(data.profile_pic || profileImage);
+        await fetchImages(data.id); // Pass user ID directly to fetch images
       } catch (error) {
         console.error('Error fetching user data:', error);
         Alert.alert('Error', 'Could not fetch user data. Please try again later.');
@@ -41,10 +44,17 @@ const ProfileScreen = ({ navigation }) => {
       }
     };
 
-    const fetchImages = async () => {
+    const fetchImages = async (userId) => {
       try {
-        const uploadedImages = await fetchUploadedImages();
-        setImages(uploadedImages);
+        const response = await getUserImage(userId); // Get images for the specific user ID
+        console.log("uploadedImages", response);
+        
+        // Check if the response has userImages and set them to the state
+        if (response.userImages) {
+          setImages(response.userImages); // Update the state with the array of images
+        } else {
+          setImages([]); // Reset to an empty array if no images found
+        }
       } catch (error) {
         console.error('Error fetching images:', error);
         Alert.alert('Error', 'Could not fetch images. Please try again later.');
@@ -52,7 +62,6 @@ const ProfileScreen = ({ navigation }) => {
     };
 
     fetchUserData();
-    // fetchImages();
   }, []);
 
   const selectProfileImage = async () => {
@@ -90,12 +99,11 @@ const ProfileScreen = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      const selectedImages = result.assets.map(asset => ({ uri: asset.uri }));
-      setImages((prevImages) => [...prevImages, ...selectedImages]);
+      const selectedImage = result.assets.map(asset => asset.uri); // Handle multiple image selection
 
       try {
         setUploading(true);
-        await uploadImages(selectedImages); // Ensure this API handles array of images
+        await uploadImages(selectedImage); // Ensure this API handles array of images
         Alert.alert('Success', 'Images uploaded successfully.');
       } catch (error) {
         console.error('Upload Error:', error);
@@ -108,7 +116,7 @@ const ProfileScreen = ({ navigation }) => {
 
   const renderItem = ({ item }) => (
     <View style={styles.gridItem}>
-      <Image source={{ uri: item.url }} style={styles.gridImage} />
+      <Image source={{ uri: item.user_image }} style={styles.gridImage} />
     </View>
   );
 
@@ -180,7 +188,7 @@ const ProfileScreen = ({ navigation }) => {
       <FlatList
         data={images}
         renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item.id} // Use unique image ID
         numColumns={3}
         columnWrapperStyle={styles.columnWrapper}
         style={styles.imageGrid}
@@ -235,74 +243,79 @@ const styles = StyleSheet.create({
   },
   addPhotoButton: {
     position: 'absolute',
-    bottom: 2,
-    right: 2,
-    backgroundColor: '#ffffff',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#fff',
     borderRadius: 50,
-    padding: 2,
+    padding: 4,
     elevation: 2,
   },
   profileDetails: {
-    marginLeft: 12,
+    marginLeft: 15,
   },
   fullName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
   },
   username: {
-    fontSize: 14,
-    color: '#777',
-    marginTop: 2,
+    fontSize: 16,
+    color: '#555',
   },
   mobileNumber: {
-    fontSize: 12,
-    color: '#555',
+    fontSize: 14,
+    color: '#777',
   },
   settingsButton: {
     padding: 10,
   },
   statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 12,
-    paddingHorizontal: 10,
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
   },
   statCard: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    minHeight: 100, // Ensures each stat card has a minimum height
   },
   statValue: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#4CAF50',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#777',
+    color: '#000',
   },
   statValueTime: {
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#000',
+    textAlign: 'center',
   },
-  progressBar: {
-    width: '100%',
-    height: 10,
-    borderRadius: 5,
-    marginTop: 4,
+  statLabel: {
+    fontSize: 14,
+    color: '#555',
   },
   buttonsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 12,
-    backgroundColor: '#f9f9f9',
+    marginVertical: 10,
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#4CAF50',
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     borderRadius: 5,
+    elevation: 2,
   },
   buttonText: {
     color: '#fff',
@@ -310,28 +323,33 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#4CAF50',
-    padding: 10,
     borderRadius: 50,
+    padding: 8,
+    elevation: 2,
   },
   imageGrid: {
-    marginVertical: 10,
-    paddingHorizontal: 10,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
+    marginBottom: 10,
   },
   gridItem: {
     flex: 1,
     margin: 5,
-    borderRadius: 10,
-    overflow: 'hidden',
-    backgroundColor: '#f0f0f0',
-    elevation: 2,
+    aspectRatio: 1, // Keep aspect ratio to 1 for square items
+    height: 100, // Set a fixed height for grid items
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   gridImage: {
     width: '100%',
-    height: 100,
-    borderRadius: 10,
+    height: '100%',
+    borderRadius: 5,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+  },
+  progressBar: {
+    height: 10,
+    borderRadius: 5,
+    marginTop: 5,
   },
 });
 
