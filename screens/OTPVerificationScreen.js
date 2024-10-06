@@ -19,7 +19,6 @@ export default function OTPVerificationScreen({ route, navigation }) {
 
       if (data.status) { // If verification is successful, store the token
         await AsyncStorage.setItem('authToken', data.token); // Store token in AsyncStorage
-        Alert.alert('Success', 'OTP verified successfully!');
         // Navigate to the Register screen or Home screen
         navigation.navigate('GymList');
       } else {
