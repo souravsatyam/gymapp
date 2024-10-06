@@ -11,7 +11,7 @@ import {
   Platform,
   Alert 
 } from 'react-native';
-import { fetchAllGyms } from '../api/apiService';  // Assumed to be paginated (limit & page supported)
+import { fetchAllGyms, userDetails } from '../api/apiService';  // Assumed to be paginated (limit & page supported)
 import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
@@ -26,7 +26,7 @@ export default function GymListScreen({ navigation }) {
   const [page, setPage] = useState(1); // Initialize page number
   const [loading, setLoading] = useState(false); // For loading spinner
   const [hasMoreGyms, setHasMoreGyms] = useState(true); // To stop fetching if no more data
-
+  const [fullName, setFUllName] = useState("");
   const limit = 9; // Number of gyms per page
 
   // Fetch gyms based on latitude, longitude, search text, page, and limit
@@ -79,7 +79,9 @@ export default function GymListScreen({ navigation }) {
     }
   };
 
+
   useEffect(() => {
+   
     getLocation(); // Get the current location when the component mounts
   }, [searchText, page]); // Update gyms based on searchText
 
@@ -136,7 +138,7 @@ export default function GymListScreen({ navigation }) {
             <Icon name="bell" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.greetingText}>Hey Deepak, looking for a gym or a workout buddy?</Text>
+        <Text style={styles.greetingText}>Hello, looking for a gym or a workout buddy?</Text>
         <TextInput
           style={styles.searchInput}
           placeholder="Search nearby gyms"

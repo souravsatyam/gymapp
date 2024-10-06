@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 const SettingsScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -13,11 +14,18 @@ const SettingsScreen = ({ navigation }) => {
     setName('');
   };
 
-  const handleLogout = () => {
-    // Handle the logout logic, e.g., clearing tokens, navigating to the login screen
-    Alert.alert('Logged Out', 'You have been logged out successfully.');
-    // Navigate to the login screen
-    navigation.navigate('Login');
+  const handleLogout = async () => {
+    try {
+      // Remove authToken from AsyncStorage
+      await AsyncStorage.removeItem('authToken');
+      
+      // Navigate to the login screen
+      navigation.navigate('Login');
+      Alert.alert('Logged Out', 'You have been logged out successfully.');
+    } catch (error) {
+      console.error('Failed to log out:', error);
+      Alert.alert('Logout Failed', 'An error occurred while logging out.');
+    }
   };
 
   return (

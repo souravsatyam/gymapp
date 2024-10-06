@@ -84,7 +84,6 @@ const GymDetailScreen = ({ navigation, route }) => {
       >
         <View style={styles.headerContainer}>
           <Text style={styles.welcomeText}>Welcome back!</Text>
-          <Text style={styles.userName}>Deepak Parmar</Text>
           <Text style={styles.bookingPrompt}>Want to book your gym sessions with just a tap?</Text>
 
           <View style={styles.imageContainer}>
@@ -196,6 +195,7 @@ const GymDetailScreen = ({ navigation, route }) => {
           <SlotSelectionScreen navigation={navigation} gym={gymData} />
         </View>
       </Modal>
+      
     </View>
   );
 };
