@@ -1,43 +1,70 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Alert, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import RazorpayCheckout from 'react-native-razorpay';
-import { createBooking } from '../api/apiService';
+import * as WebBrowser from 'expo-web-browser';
+import axios from 'axios';
+import { createBooking, createOrder } from '../api/apiService';
 
 const PaymentScreen = ({ route, navigation }) => {
   const { slotDetails } = route.params; // Extract slot details from navigation parameters
-  
+  const [loading, setLoading] = useState(false); // Loading state for button
+
   console.log("slotDetails", slotDetails);
+
+  // Function to create an order by calling your backend
+
+
   const handlePayment = async () => {
-    const data = await createBooking(slotDetails);
-    if(data) {
-      navigation.navigate('ConfirmationScreen', {slotDetails, data});
-    } else {
-      Alert.alert("Some error occured while booking slot");
+    try {
+      setLoading(true);
+
+      // Step 1: Create the payment order first
+      const orderResponse = await createOrder(slotDetails.price * (slotDetails.duration / 60));
+      console.log("orderResponse", orderResponse);
+      if (orderResponse && orderResponse.id) {
+        // Step 2: Open Razorpay payment link in the browser
+        const paymentOptions = {
+          description: 'Slot Booking Payment',
+          image: 'https://your-logo-url.com',
+          currency: orderResponse.currency,
+          key: 'RAZOR_PAY_KEY', // Your Razorpay key
+          amount: orderResponse.amount, // Amount in paise
+          order_id: orderResponse.id, // Razorpay order ID
+          prefill: {
+            email: 'user@example.com',
+            contact: '9191919191',
+            name: 'User Name',
+          },
+          theme: { color: '#F37254' },
+        };
+
+        const result = await WebBrowser.openBrowserAsync(orderResponse.paymentLink);
+       
+
+        // Step 3: After successful payment, create the booking
+        if (result.type === 'opened') {
+          const bookingResponse = await createBooking(slotDetails); // Create booking on success
+          if (bookingResponse) {
+            // Navigate to confirmation page after booking
+            navigation.navigate('ConfirmationScreen', { slotDetails, data: bookingResponse });
+          } else {
+            Alert.alert('Booking creation failed.');
+          }
+        } else {
+          Alert.alert('Payment was not completed.');
+        }
+      } else {
+        Alert.alert('Some error occurred while creating the payment order.');
+      }
+    } catch (error) {
+      Alert.alert('Error: ' + error.message);
+    } finally {
+      setLoading(false);
     }
-    
-    // var options = {
-    //   description: 'Credits towards consultation',
-    //   image: 'https://i.imgur.com/3g7nmJC.png',
-    //   currency: 'INR',
-    //   key: 'QaunL5f3pREFgj4wZXgruC57', // Your api key
-    //   amount: slotDetails.price * (slotDetails.duration/60), // Amount in paisa (50000 paisa = ₹500),
-    //   name: 'foo',
-    //   prefill: {
-    //     email: 'void@razorpay.com',
-    //     contact: '9191919191',
-    //     name: 'Razorpay Software'
-    //   },
-    //   theme: {color: '#F37254'}
-    // }
-    // RazorpayCheckout.open(options).then((data) => {
-    //   // handle success
-    //   Alert.alert(`Success: Payment ID: ${data.razorpay_payment_id}`);
-    // }).catch((error) => {
-    //   // handle failure
-    //   Alert.alert(`Error: ${error.code} | ${error.description}`);
-    // });
   };
+
+
+  
 
   return (
     <ImageBackground
@@ -63,12 +90,15 @@ const PaymentScreen = ({ route, navigation }) => {
           <Text style={styles.detail}>Duration: {slotDetails.duration} mn</Text>
         </View>
         <View style={styles.detailRow}>
-         
-          <Text style={styles.price}>Price: INR {slotDetails.price * (slotDetails.duration/60)}</Text>
+          <Text style={styles.price}>Price: INR {slotDetails.price * (slotDetails.duration / 60)}</Text>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handlePayment}>
-          <Text style={styles.buttonText}>Proceed</Text>
+        <TouchableOpacity style={styles.button} onPress={handlePayment} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Proceed</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -116,16 +146,6 @@ const styles = StyleSheet.create({
     color: '#555',
     textAlign: 'center',
     fontFamily: 'Roboto',
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2e7d32',
-    marginBottom: 10,
-    textAlign: 'left',
-  },
-  slotDetails: {
-    marginTop: 10,
   },
   detailRow: {
     flexDirection: 'row',

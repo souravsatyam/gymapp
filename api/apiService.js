@@ -115,6 +115,7 @@ export const verifyOtp = async (mobileNumber, otp) => {
       const formattedBuddies = data.map(user => ({
         id: user.id,
         name: user.full_name,
+        username: user.username,
         status: user.is_selected ? 'Available' : 'Unavailable',
         image: user.profile_pic || 'https://via.placeholder.com/50', // Use a placeholder if no image
         inGym: user.is_selected,
@@ -170,7 +171,7 @@ export const verifyOtp = async (mobileNumber, otp) => {
 
 
   export const createBooking = async (slotDetails) => {
-    console.log("slotDetails.date", slotDetails.date);
+   
     try {
    
         const [month, day, year] = slotDetails.date.split('/'); // Split by '/' 
@@ -400,3 +401,22 @@ export const getUserImage = async (userId, page = 1) => {
     throw error; // Rethrow the error for further handling
 }
 }
+
+
+export const createOrder = async (amount) => {
+  try {
+    const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
+    const response = await axios.post(`${BASE_URL}/booking/initiate`, {
+      amount: amount, // Send the amount to your backend (e.g., 500 for INR 500)
+    },{
+      headers: {
+        Authorization: `Bearer ${userToken}`,  // Add the Bearer token here
+      },
+    });
+    
+    return response.data; // This should include the Razorpay order_id, amount, currency, etc.
+  } catch (error) {
+    console.log('Error creating order:', error);
+    throw error; // Handle error accordingly
+  }
+};
