@@ -99,7 +99,7 @@ const ProfileScreen = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      const selectedImage = result.assets.map(asset => asset.uri); // Handle multiple image selection
+      const selectedImage = result.assets[0].uri;
 
       try {
         setUploading(true);

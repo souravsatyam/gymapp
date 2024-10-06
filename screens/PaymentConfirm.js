@@ -27,7 +27,7 @@ const PaymentScreen = ({ route, navigation }) => {
           description: 'Slot Booking Payment',
           image: 'https://your-logo-url.com',
           currency: orderResponse.currency,
-          key: 'RAZOR_PAY_KEY', // Your Razorpay key
+          key: 'rzp_test_EldByscIlZGrQb', // Your Razorpay key
           amount: orderResponse.amount, // Amount in paise
           order_id: orderResponse.id, // Razorpay order ID
           prefill: {
@@ -79,7 +79,7 @@ const PaymentScreen = ({ route, navigation }) => {
             Welcome to {slotDetails.gymName}, your ultimate fitness destination!
             We offer a variety of classes and personal training options to fit your needs.
           </Text>
-          <Text style={styles.gymLocation}>Location: 123 Fitness St, Fit City</Text>
+          <Text style={styles.gymLocation}>{slotDetails.location}</Text>
         </View>
         <View style={styles.detailRow}>
           <Icon name="access-time" size={24} color="#2e7d32" />
