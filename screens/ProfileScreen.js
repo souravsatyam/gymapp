@@ -20,6 +20,7 @@ import {
   uploadImages,
   getUserImage,
 } from '../api/apiService'; // Ensure you have the correct path
+import CustomHeader from '../components/Header';
 
 const ProfileScreen = ({ navigation }) => {
   const [profileImage, setProfileImage] = useState('https://via.placeholder.com/150');
@@ -130,6 +131,7 @@ const ProfileScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <CustomHeader />
       {/* Profile Header with Stats */}
       <View style={styles.headerContainer}>
         <View style={styles.profileHeader}>

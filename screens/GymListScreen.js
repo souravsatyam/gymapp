@@ -19,6 +19,7 @@ import Footer from '../components/Footer';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
+
 export default function GymListScreen({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [gyms, setGyms] = useState([]);
@@ -139,6 +140,7 @@ export default function GymListScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* Custom header with greeting and search bar */}
+    
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.locationContainer}>
