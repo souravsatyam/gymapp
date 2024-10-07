@@ -18,6 +18,7 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import Footer from '../components/Footer';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import CustomHeader from '../components/Header';
 
 
 export default function GymListScreen({ navigation }) {
@@ -139,6 +140,7 @@ export default function GymListScreen({ navigation }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <CustomHeader />
       {/* Custom header with greeting and search bar */}
     
       <View style={styles.header}>
@@ -149,9 +151,7 @@ export default function GymListScreen({ navigation }) {
               {address || 'Fetching location...'}
             </Text>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate('NotificationListScreen')}>
-            <Icon name="bell" size={24} color="#fff" />
-          </TouchableOpacity>
+          
         </View>
         <Text style={styles.greetingText}>Hey {fullName}, looking for a gym or a workout buddy?</Text>
         <TextInput
