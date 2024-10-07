@@ -5,6 +5,7 @@ import SlotSelectionScreen from './SlotSelectionScreen';
 import AmenitiesListPopup from '../components/AmenitiesListPopup';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import CustomHeader from '../components/Header';
+import Footer from '../components/Footer';
 
 // Get screen width
 const screenWidth = Dimensions.get('window').width;
@@ -197,7 +198,7 @@ const GymDetailScreen = ({ navigation, route }) => {
           <SlotSelectionScreen navigation={navigation} gym={gymData} />
         </View>
       </Modal>
-      
+      <Footer navigation={navigation} />
     </View>
   );
 };
@@ -337,7 +338,7 @@ cityContainer: {
   },
   button: {
     position: 'absolute',
-    bottom: 20, // Fixed position of the button at the bottom
+    bottom: 80, // Fixed position of the button at the bottom
     left: 20,
     right: 20,
     backgroundColor: '#4CAF50',
