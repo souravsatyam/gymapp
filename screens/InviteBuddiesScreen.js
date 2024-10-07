@@ -69,6 +69,7 @@ const InviteBuddiesScreen = ({ navigation }) => {
         <Text style={styles.buddyName}>{item.name}</Text>
         <Text style={styles.username}>{item.username}</Text>
       </View>
+   
       {(item?.invited?.accepted) && (
         <TouchableOpacity style={styles.invitedButton}>
           <Text style={styles.invitedButtonText}>Friends</Text>

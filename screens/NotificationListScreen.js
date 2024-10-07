@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { acceptFriendRequest, fetchAllNotifications, rejectFriendRequest } from '../api/apiService'; // Ensure this path is correct
+import Footer from '../components/Footer';
+import CustomHeader from '../components/Header';
 
 const NotificationListScreen = ({ navigation }) => {
   const [notifications, setNotifications] = useState([]);
@@ -44,14 +46,19 @@ const NotificationListScreen = ({ navigation }) => {
     } catch (error) {
         setError(error.message);
     }
-};
+  };
 
   // Render individual notification item
   const renderItem = ({ item }) => (
     <View style={styles.notificationItem}>
+      {/* Display User Profile Image */}
+      <Image
+        source={{ uri: item.profileImage || 'https://via.placeholder.com/50' }} // Placeholder if image is not available
+        style={styles.profileImage}
+      />
       <View style={styles.notificationContent}>
         <Text style={styles.notificationText}>
-          <Text style={styles.username}>{item.user || 'Unknown User'}</Text> 
+ 
           {item.others ? `, ${item.others}` : ''} {item.message || 'No message available.'}
         </Text>
         <Text style={styles.time}>{item.createdAt || 'Time not available.'}</Text>
@@ -79,7 +86,6 @@ const NotificationListScreen = ({ navigation }) => {
           </>
         )}
 
-        
         {item.type === 'workoutRequestInvite' && (
           <TouchableOpacity 
             style={styles.viewButton} 
@@ -112,13 +118,15 @@ const NotificationListScreen = ({ navigation }) => {
   if (error) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>{error}</Text>
+        <CustomHeader />
+          <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      <CustomHeader />
       <Text style={styles.header}>Notifications</Text>
       <FlatList
         data={notifications}
@@ -158,11 +166,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
+  profileImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 25,
+    marginRight: 15,
+  },
   notificationContent: {
     flex: 1,
   },
   notificationText: {
-    fontSize: 16,
+    fontSize: 12,
     color: '#555',
     marginBottom: 4,
   },
