@@ -38,7 +38,7 @@ export default function OTPVerificationScreen({ route, navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Enter OTP"
-        placeholderTextColor="#ccc"
+        placeholderTextColor='#808080'
         keyboardType="numeric"
         maxLength={6}
         value={otp}
@@ -65,18 +65,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#000', // Black background
+    backgroundColor: '#FFFFFF', // white background
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#fff', // White text
+    color: '#0ED94A', // White text
     marginBottom: 20,
   },
   subtitle: {
     textAlign: 'center',
-    color: '#ccc', // Light gray subtitle text
+    color: '#808080', // Light gray subtitle text
     marginBottom: 40,
   },
   input: {
@@ -85,9 +85,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     padding: 15,
-    backgroundColor: '#333', // Dark gray input background
-    color: '#fff', // White text in input
+    backgroundColor: '#D3D3D3', // Dark gray input background
+    color: '#333', // White text in input
     marginBottom: 20,
+    fontSize: 18,
+    fontWeight:'bold',
   },
   button: {
     backgroundColor: '#28a745', // Green button
@@ -104,7 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   resendText: {
-    color: '#ccc', // Light gray resend text
+    color: '#808080', // Light gray resend text
     marginTop: 20,
     textAlign: 'center',
   },

@@ -1,5 +1,3 @@
-// screens/LoginScreen.js
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { loginUser } from '../api/apiService'; // Import the loginUser function
@@ -8,7 +6,6 @@ const LoginScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const handleLogin = async () => {
-    
     if (!phoneNumber) {
       Alert.alert('Error', 'Please enter your phone number.');
       return;
@@ -30,12 +27,13 @@ const LoginScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Logo Image */}
       <Image
-        source={{ uri: 'https://d250w8f359rhg6.cloudfront.net/static/media/logo-removebg-preview.783e77ab47a976cb321a.png' }} // Replace with your logo URL
+        //source={require('../assets/logowithouticon.jpg')} // Your splash screen image
         style={styles.logo}
         resizeMode="contain"
       />
 
-      <Text style={styles.title}>Welcome back! Glad to see you, Agains!</Text>
+      {/* Welcome Text */}
+      <Text style={styles.title}>Welcome back! Glad to see you, Again!</Text>
       <Text style={styles.subtitle}>Book Your Workout Anytime, Anywhere</Text>
 
       <TextInput
@@ -43,7 +41,7 @@ const LoginScreen = ({ navigation }) => {
         placeholder="Enter your phone number"
         keyboardType="phone-pad"
         maxLength={10}
-        placeholderTextColor="#fff"
+        placeholderTextColor='#808080'
         value={phoneNumber}
         onChangeText={setPhoneNumber}
       />
@@ -68,25 +66,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#000',
+    backgroundColor: '#FFFFFF',
   },
-  logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 20,
-  },
+
+  
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
-    color: '#fff',
+    color: '#0ED94A',
   },
   subtitle: {
     fontSize: 16,
-    color: '#fff',
+    color: '#808080',
     textAlign: 'center',
     marginBottom: 40,
+    fontWeight: 'bold',
   },
   input: {
     width: '100%',
@@ -94,9 +90,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     padding: 15,
-    backgroundColor: '#333',
-    color: '#fff',
+    backgroundColor: '#D3D3D3',
+    color: '#333',
     marginBottom: 20,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   button: {
     backgroundColor: '#28a745',

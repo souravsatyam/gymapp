@@ -4,14 +4,11 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Footer from '../components/Footer';
 import { fetchAllNearByUser } from '../api/apiService';
 import { addFriend } from '../api/apiService'; // Import the addFriend function
-import CustomHeader from '../components/Header';
+//import CustomHeader from '../components/Header';
 
 const InviteBuddiesScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [buddyList, setBuddyList] = useState([]);
-  const [typedText, setTypedText] = useState(''); // State for typed text
-  const message = "Add users to collaborate for better gyming"; // The message to type out
-  const fadeAnim = useRef(new Animated.Value(1)).current; // Animated value for fading
 
   // Fetch nearby users from the API
   const fetchNearbyUsers = async () => {
@@ -27,16 +24,7 @@ const InviteBuddiesScreen = ({ navigation }) => {
   useEffect(() => {
     // Fetch users on component mount
     fetchNearbyUsers();
-    // Start typing effect when the component mounts
-    typeMessage();
   }, []);
-
-  const typeMessage = (index = 0) => {
-    if (index < message.length) {
-      setTypedText(prev => prev + message[index]); // Add next character
-      setTimeout(() => typeMessage(index + 1), 100); // Speed up typing effect to 100ms
-    }
-  };
 
   // Handle inviting a buddy
   const handleInvite = async (id) => {
@@ -53,21 +41,6 @@ const InviteBuddiesScreen = ({ navigation }) => {
   const searchUser = async (user) => {
     setSearchText(user);
     fetchNearbyUsers();
-
-    // Hide the default message and start fading out the moving text
-    if (user) {
-      setTypedText(''); // Clear typed text when user starts typing
-      Animated.timing(fadeAnim, {
-        toValue: 0, // Fade out
-        duration: 300, // Duration of fade out
-        useNativeDriver: true,
-      }).start(() => {
-        // Optional: Clear the text after fading out if needed
-      });
-    } else {
-      setTypedText(message); // Reset to original message if input is cleared
-      fadeAnim.setValue(1); // Reset opacity
-    }
   };
 
   // Render a buddy
@@ -98,7 +71,7 @@ const InviteBuddiesScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader />
+      {/* <CustomHeader /> */}
       <View style={styles.header}>
         <Text><Icon name="dumbbell" size={40} color="#fff" /></Text>
         <View>
@@ -108,15 +81,14 @@ const InviteBuddiesScreen = ({ navigation }) => {
 
       {/* Search bar */}
       <View style={styles.searchContainer}>
-        <Text><Icon name="magnify" size={24} color="#888" /></Text>
+        {/* <Text><Icon name="magnify" size={24} color="#888" /></Text> */}
         <TextInput
           style={styles.searchInput}
-          //placeholder="Search user..."
-          //placeholderTextColor="#8BC34A" // Light green color for placeholder
           value={searchText}
+          placeholder="Add users to collaborate for better gyming"
+          placeholderTextColor="#ccc"
           onChangeText={(text) => searchUser(text)}
         />
-        <Animated.Text style={[styles.movingText, { opacity: fadeAnim }]}>{typedText}</Animated.Text>
       </View>
 
       {/* Buddy List */}
@@ -153,15 +125,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     fontWeight: 'normal', // No bold font weight
-  },
-  movingText: {
-    color: '#D3D3D3', // Color of the moving text
-    //fontWeight: 'bold',
-    fontSize: 14,
-    marginLeft: 4, // Space between the icon and moving text
-    position: 'absolute',
-    left: 50, // Position next to the search icon
-    top: 10, // Adjust this as needed to align with the search input
   },
   buddyList: {
     padding: 16,
