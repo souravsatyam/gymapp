@@ -1,222 +1,227 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { fetchAllBookings, cancelBooking, rebook } from '../api/apiService'; // Assuming these functions are defined in your API service
-import Footer from '../components/Footer';
+import React, { useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 
 const MyBookings = () => {
-  const [activeTab, setActiveTab] = useState('Upcoming');
-  const [bookings, setBookings] = useState([]);
-  const navigation = useNavigation();
+  const [activeTab, setActiveTab] = useState('upcoming');
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const data = await fetchAllBookings();
-        console.log("data received", data);
-        setBookings(data.Booking); // Set bookings directly from the API response
-      } catch (error) {
-        console.error("Error fetching bookings:", error);
-      }
-    };
-
-    fetchBookings();
-  }, []);
-
-  const handleCancelBooking = async (bookingId) => {
-    try {
-      const response = await cancelBooking(bookingId);
-      if (response.success) {
-        Alert.alert("Success", "Your booking has been canceled.");
-        setBookings(prevBookings => prevBookings.filter(booking => booking.bookingId !== bookingId));
-      } else {
-        Alert.alert("Error", response.message);
-      }
-    } catch (error) {
-      console.error("Error canceling booking:", error);
-      Alert.alert("Error", "Could not cancel the booking.");
-    }
-  };
-
-  const handleRebook = async (booking) => {
-    try {
-      const response = await rebook(booking);
-      if (response.success) {
-        Alert.alert("Success", "Your booking has been rebooked.");
-        setBookings(prevBookings => prevBookings.filter(b => b.bookingId !== booking.bookingId));
-      } else {
-        Alert.alert("Error", response.message);
-      }
-    } catch (error) {
-      console.error("Error rebooking:", error);
-      Alert.alert("Error", "Could not rebook.");
-    }
-  };
-
-  const handleInviteFriends = (bookingId) => {
-    navigation.navigate('InviteFriendBuddy', { bookingId });
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'Upcoming' && styles.activeTabButton]}
-          onPress={() => setActiveTab('Upcoming')}
+      {/* Header */}
+      <Text style={styles.header}>My bookings</Text>
+
+      {/* Tabs for Upcoming and Completed */}
+      <View style={styles.tabs}>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'upcoming' && styles.activeTab]} 
+          onPress={() => handleTabClick('upcoming')}
         >
-          <Text style={[styles.tabButtonText, activeTab === 'Upcoming' && styles.activeTabText]}>
-            Upcoming
-          </Text>
+          <Text style={[styles.tabText, activeTab === 'upcoming' && styles.activeTabText]}>Upcoming</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'Completed' && styles.activeTabButton]}
-          onPress={() => setActiveTab('Completed')}
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'completed' && styles.activeTab]} 
+          onPress={() => handleTabClick('completed')}
         >
-          <Text style={[styles.tabButtonText, activeTab === 'Completed' && styles.activeTabText]}>
-            Completed
-          </Text>
+          <Text style={[styles.tabText, activeTab === 'completed' && styles.activeTabText]}>Completed</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scrollView}>
-        {bookings
-          .filter(booking => activeTab === 'Upcoming' ? new Date(booking.bookingDate) >= new Date() : new Date(booking.bookingDate) < new Date())
-          .map((booking) => (
-            <View key={booking.bookingId} style={styles.bookingContainer}>
-              <View style={styles.bookingDetails}>
-                <Text style={styles.bookingDate}>Date: {booking.bookingDate}</Text>
-                <Text style={styles.gymName}>{booking.gymName}</Text>
-                <Text style={styles.subscriptionPrice}>Price: ${booking.subscriptionPrice}</Text>
-                <Text style={styles.subscriptionPrice}>Invited Buddy: {booking.invitedBuddyCount}</Text>
-                {/* Small text link to invite friends */}
-                  
-                  <TouchableOpacity onPress={() => handleInviteFriends(booking.bookingId)}>
-                    <Text style={styles.inviteLink}>Invite friends to join!</Text>
-                  </TouchableOpacity>
-             
-              </View>
-              <Image
-                source={{ uri: booking.gymImage }}
-                style={styles.gymImage}
-                resizeMode="cover"
-              />
-              {activeTab === 'Upcoming' && (
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => handleCancelBooking(booking.bookingId)}
-                >
-                  <Text style={styles.buttonText}>Cancel Booking</Text>
-                </TouchableOpacity>
-              )}
-              {activeTab === 'Completed' && (
-                <TouchableOpacity
-                  style={styles.rebookButton}
-                  onPress={() => handleRebook(booking)}
-                >
-                  <Text style={styles.buttonText}>Rebook</Text>
-                </TouchableOpacity>
-              )}
+      {/* Scrollable Bookings List */}
+      <ScrollView>
+        {/* Booking Card Example */}
+        <View style={styles.bookingCard}>
+          <Text style={styles.bookingDate}>Booking Date: April 26, 2023, 10:00 PM - 03:00 PM</Text>
+          <View style={styles.gymDetails}>
+            <Image 
+              source={{ uri: 'https://via.placeholder.com/80' }} // Replace with real gym image URL
+              style={styles.gymImage}
+            />
+            <View>
+              <Text style={styles.gymName}>FitZone Gym</Text>
+              <Text style={styles.gymLocation}>Fitness Gym, Downtown</Text>
+              <Text style={styles.rating}>⭐⭐⭐⭐⭐ 4.5 (120 Reviews)</Text>
+              <Text style={styles.invites}>2 Invites</Text>
             </View>
-          ))}
+          </View>
+
+          {/* Action Buttons */}
+          <View style={styles.bookingActions}>
+            <TouchableOpacity style={styles.cancelButton}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.detailsButton}>
+              <Text style={styles.detailsButtonText}>View Details</Text>
+            </TouchableOpacity>
+
+            <View style={styles.addMore}>
+              <TouchableOpacity style={styles.addMoreBtn}>
+                <Text style={styles.addMoreBtnText}>-</Text>
+              </TouchableOpacity>
+              <Text style={styles.inviteCount}>1</Text>
+              <TouchableOpacity style={styles.addMoreBtn}>
+                <Text style={styles.addMoreBtnText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </ScrollView>
-      <Footer navigation={navigation} />
+
+      {/* Bottom Navigation */}
+      <View style={styles.bottomNavigation}>
+        <TouchableOpacity>
+          <Text style={styles.navIcon}>🏠</Text>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={styles.navIcon}>🔍</Text>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={[styles.navIcon, styles.activeNavIcon]}>📅</Text>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={styles.navIcon}>👤</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5', // Light gray background for a clean look
+    backgroundColor: '#f2f2f2',
   },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 10,
-  },
-  tabButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    backgroundColor: '#e0f7fa', // Light blue for tabs
-  },
-  activeTabButton: {
-    backgroundColor: '#80deea', // Darker blue for active tab
-  },
-  tabButtonText: {
-    color: '#00796b', // Dark teal text
-    fontSize: 16,
+  header: {
+    fontSize: 24,
+    textAlign: 'center',
+    marginVertical: 20,
     fontWeight: 'bold',
   },
+  tabs: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  tab: {
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 20,
+    backgroundColor: '#f2f2f2',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginHorizontal: 10,
+  },
+  tabText: {
+    color: '#666',
+  },
+  activeTab: {
+    backgroundColor: '#4caf50',
+  },
   activeTabText: {
-    color: '#004d40', // Darker shade for active tab
+    color: '#fff',
   },
-  scrollView: {
-    marginBottom: 60,
-  },
-  bookingContainer: {
-    marginBottom: 15,
-    padding: 10,
+  bookingCard: {
+    backgroundColor: '#fff',
+    margin: 10,
+    padding: 15,
     borderRadius: 10,
-    backgroundColor: '#ffffff', // White background for bookings
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  bookingDetails: {
-    marginVertical: 5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 5,
+    elevation: 3,
   },
   bookingDate: {
     fontSize: 14,
-    color: '#00796b', // Dark teal
+    color: '#777',
   },
-  gymName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#004d40', // Darker teal
-    marginTop: 5,
-  },
-  subscriptionPrice: {
-    fontSize: 14,
-    color: '#00796b',
-    fontWeight: 'bold',
-    marginTop: 5,
-  },
-  inviteLink: {
-    fontSize: 14,
-    color: '#2196F3', // Blue for link
-    marginTop: 5,
-    textDecorationLine: 'underline', // Underline to indicate it's a link
+  gymDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
   },
   gymImage: {
-    height: 120,
-    width: '100%',
-    borderRadius: 8,
-    marginTop: 10,
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    marginRight: 10,
   },
-  cancelButton: {
-    backgroundColor: '#f44336', // Red for cancel button
-    borderRadius: 5,
-    padding: 10,
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  rebookButton: {
-    backgroundColor: '#4caf50', // Green for rebook button
-    borderRadius: 5,
-    padding: 10,
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
+  gymName: {
+    fontSize: 18,
     fontWeight: 'bold',
   },
+  gymLocation: {
+    fontSize: 14,
+    color: '#777',
+  },
+  rating: {
+    fontSize: 14,
+    color: '#ff9800',
+  },
+  invites: {
+    fontSize: 14,
+    color: '#666',
+  },
+  bookingActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  cancelButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    borderColor: '#4caf50',
+    borderWidth: 1,
+  },
+  cancelButtonText: {
+    color: '#4caf50',
+  },
+  detailsButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: '#4caf50',
+  },
+  detailsButtonText: {
+    color: '#fff',
+  },
+  addMore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addMoreBtn: {
+    backgroundColor: '#4caf50',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+  },
+  addMoreBtnText: {
+    color: '#fff',
+  },
+  inviteCount: {
+    marginHorizontal: 10,
+    fontSize: 16,
+    color: '#000',
+  },
+  bottomNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+    backgroundColor: '#000',
+  },
+  navIcon: {
+    color: '#fff',
+    fontSize: 24,
+  },
+  activeNavIcon: {
+    color: '#4caf50',
+  },
 });
+
 
 export default MyBookings;
