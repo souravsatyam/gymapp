@@ -3,6 +3,7 @@ import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity }
 import axios from 'axios';
 import { fetchAllBookings } from '../api/apiService';
 import Footer from '../components/Footer';
+import CustomHeader from '../components/Header';
 
 const BookingScreen = ({navigation}) => {
   const [bookings, setBookings] = useState([]);
@@ -82,6 +83,7 @@ const BookingScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
+      <CustomHeader />
       {/* Tabs for Upcoming and Completed */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
@@ -114,7 +116,7 @@ const BookingScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+   
     backgroundColor: '#fff',
   },
   tabContainer: {
