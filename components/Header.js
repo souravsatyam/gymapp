@@ -12,9 +12,9 @@ const CustomHeader = ({ onNotificationPress }) => {
       />
 
       {/* Notification */}
-      <TouchableOpacity onPress={onNotificationPress} style={styles.notificationContainer}>
+      {/* <TouchableOpacity onPress={onNotificationPress} style={styles.notificationContainer}>
         <Icon name="notifications" type="material" color="#333" size={24} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };
@@ -26,8 +26,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     backgroundColor: '#fff',
-    height: 60,
-    marginTop: 20
+    height: 30,
+    marginTop: 0
   },
   logo: {
     width: 100,

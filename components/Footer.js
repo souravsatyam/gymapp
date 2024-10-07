@@ -6,22 +6,22 @@ const Footer = ({ navigation }) => {
   return (
     <View style={styles.footer}>
       <TouchableOpacity onPress={() => navigation.navigate('GymList')} style={styles.iconContainer}>
-        <Icon name="home" size={24} color="#1c1c1c" />
+        <Icon name="home" size={22} color="#808080" />
         <Text style={styles.iconText}>Home</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('InviteBuddy')} style={styles.iconContainer}>
-        <Icon name="search" size={24} color="#1c1c1c" />
+        <Icon name="search" size={22} color="#808080" />
         <Text style={styles.iconText}>Search</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('MyBookings')} style={styles.iconContainer}>
-        <Icon name="calendar" size={24} color="#1c1c1c" />
+        <Icon name="calendar" size={22} color="#808080" />
         <Text style={styles.iconText}>Bookings</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.iconContainer}>
-        <Icon name="user" size={24} color="#1c1c1c" />
+        <Icon name="user" size={22} color="#808080" />
         <Text style={styles.iconText}>Profile</Text>
       </TouchableOpacity>
     </View>
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    height: 60,
+    height: 55,
     backgroundColor: '#ffffff', // Change background to white
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0', // Lighter border color
@@ -45,11 +45,11 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     alignItems: 'center',
-    padding: 10, // Add padding for better touch area
+    padding: 8, // Add padding for better touch area
   },
   iconText: {
     color: '#1c1c1c', // Change text color to a darker shade for contrast
-    fontSize: 14, // Slightly increase font size
+    fontSize: 12, // Slightly increase font size
     marginTop: 4, // Space between icon and text
   },
 });

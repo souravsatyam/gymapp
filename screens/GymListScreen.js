@@ -145,11 +145,11 @@ export default function GymListScreen({ navigation }) {
 
   return (
     <>
-    <View
+     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <CustomHeader />
+      {/* <CustomHeader /> */}
       {/* Custom header with greeting and search bar */}
     
       <View style={styles.header}>
@@ -160,7 +160,11 @@ export default function GymListScreen({ navigation }) {
               {address || 'Fetching location...'}
             </Text>
           </View>
-          
+          <TouchableOpacity onPress={() => navigation.navigate('NotificationListScreen')}>
+
+            <Icon name="bell" size={24} color="#fff" />
+
+          </TouchableOpacity>
         </View>
         <Text style={styles.greetingText}>Hey {fullName}, looking for a gym or a workout buddy?</Text>
         <TextInput
@@ -186,8 +190,9 @@ export default function GymListScreen({ navigation }) {
         
       />
      
-    </View>
+
     <Footer navigation={navigation} />
+    </KeyboardAvoidingView>
     </>
   );
 }
@@ -203,11 +208,13 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     elevation: 5,
+    height: 200,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 25,
   },
   locationContainer: {
     flexDirection: 'column',

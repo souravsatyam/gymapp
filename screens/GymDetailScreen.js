@@ -4,7 +4,7 @@ import { fetchIndividualGymData } from '../api/apiService';
 import SlotSelectionScreen from './SlotSelectionScreen';
 import AmenitiesListPopup from '../components/AmenitiesListPopup';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import CustomHeader from '../components/Header';
+//import CustomHeader from '../components/Header';
 import Footer from '../components/Footer';
 
 // Get screen width
@@ -79,15 +79,19 @@ const GymDetailScreen = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader />
+      {/* <CustomHeader /> */}
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerContainer}>
-          {/* <Text style={styles.welcomeText}>Welcome back!</Text> */}
-          <Text style={styles.userName}>Deepak Parmar</Text>
+        <View style={styles.headerRow}>
+    <TouchableOpacity onPress={() => navigation.goBack()}>
+      <Icon name="arrow-left" size={24} color="#4CAF50" style={styles.backIcon} />
+    </TouchableOpacity>
+    <Text style={styles.userName}>Deepak Parmar</Text>
+  </View>
           <Text style={styles.bookingPrompt}>Want to book your gym sessions with just a tap?</Text>
 
           <View style={styles.imageContainer}>
@@ -206,7 +210,8 @@ const GymDetailScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //backgroundColor: '#fff',
+    backgroundColor: '#fff',
+    marginTop: 0,
   },
   scrollView: {
     flex: 1,
@@ -217,6 +222,14 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     marginBottom: 15,
+    marginTop: 40,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center', // Center vertically
+  },
+  backIcon: {
+    marginRight: 10, // Space between the arrow and username
   },
   imageContainer: {
     position: 'relative',
