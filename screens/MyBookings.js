@@ -1,227 +1,184 @@
-import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import axios from 'axios';
+import { fetchAllBookings } from '../api/apiService';
+import Footer from '../components/Footer';
 
-const MyBookings = () => {
-  const [activeTab, setActiveTab] = useState('upcoming');
+const BookingScreen = ({navigation}) => {
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedTab, setSelectedTab] = useState('Upcoming'); // State for tab selection
 
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
+  // Fetch booking data from API
+  const fetchBookings = async () => {
+    try {
+      const response = await fetchAllBookings();
+
+      setBookings(response.Booking); // Update state with booking data
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to fetch data');
+      setLoading(false);
+    }
   };
 
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <Text style={styles.header}>My bookings</Text>
+  useEffect(() => {
+    fetchBookings(); // Fetch bookings on component mount
+  }, []);
 
-      {/* Tabs for Upcoming and Completed */}
-      <View style={styles.tabs}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'upcoming' && styles.activeTab]} 
-          onPress={() => handleTabClick('upcoming')}
-        >
-          <Text style={[styles.tabText, activeTab === 'upcoming' && styles.activeTabText]}>Upcoming</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'completed' && styles.activeTab]} 
-          onPress={() => handleTabClick('completed')}
-        >
-          <Text style={[styles.tabText, activeTab === 'completed' && styles.activeTabText]}>Completed</Text>
-        </TouchableOpacity>
-      </View>
+  // Helper function to determine if the booking is upcoming or completed
+  const isUpcoming = (bookingDate) => {
+    const today = new Date();
+    const bookingDay = new Date(bookingDate);
+    return bookingDay >= today; // Future or today
+  };
 
-      {/* Scrollable Bookings List */}
-      <ScrollView>
-        {/* Booking Card Example */}
-        <View style={styles.bookingCard}>
-          <Text style={styles.bookingDate}>Booking Date: April 26, 2023, 10:00 PM - 03:00 PM</Text>
-          <View style={styles.gymDetails}>
-            <Image 
-              source={{ uri: 'https://via.placeholder.com/80' }} // Replace with real gym image URL
-              style={styles.gymImage}
-            />
-            <View>
-              <Text style={styles.gymName}>FitZone Gym</Text>
-              <Text style={styles.gymLocation}>Fitness Gym, Downtown</Text>
-              <Text style={styles.rating}>⭐⭐⭐⭐⭐ 4.5 (120 Reviews)</Text>
-              <Text style={styles.invites}>2 Invites</Text>
-            </View>
-          </View>
+  // Filter bookings based on selected tab (Upcoming or Completed)
+  const filteredBookings = bookings.filter((item) => {
+    return selectedTab === 'Upcoming' ? isUpcoming(item.bookingDate) : !isUpcoming(item.bookingDate);
+  });
 
-          {/* Action Buttons */}
-          <View style={styles.bookingActions}>
-            <TouchableOpacity style={styles.cancelButton}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.detailsButton}>
-              <Text style={styles.detailsButtonText}>View Details</Text>
-            </TouchableOpacity>
+  // Handler for View Details button
+  const handleViewDetails = (bookingId) => {
+    console.log('View details for:', bookingId);
+    // Navigate to booking details page or show more information
+  };
 
-            <View style={styles.addMore}>
-              <TouchableOpacity style={styles.addMoreBtn}>
-                <Text style={styles.addMoreBtnText}>-</Text>
-              </TouchableOpacity>
-              <Text style={styles.inviteCount}>1</Text>
-              <TouchableOpacity style={styles.addMoreBtn}>
-                <Text style={styles.addMoreBtnText}>+</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
+  // Handler for Cancel Booking button
+  const handleCancelBooking = (bookingId) => {
+    console.log('Cancel booking:', bookingId);
+    // Implement cancel booking logic
+  };
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNavigation}>
-        <TouchableOpacity>
-          <Text style={styles.navIcon}>🏠</Text>
+  // Render each booking item with View Details and Cancel Booking buttons
+  const renderBookingItem = ({ item }) => (
+    <View style={styles.bookingCard}>
+      <Text style={styles.gymName}>{item.gymName}</Text>
+      <Text>Date: {item.bookingDate}</Text>
+      <Text>Start Time: {item.slotStartTime}</Text>
+      <Text>Subscription Price: {item.subscriptionPrice}</Text>
+      <Text>Buddies Invited: {item.invitedBuddyCount}</Text>
+      
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.viewDetailsButton} onPress={() => handleViewDetails(item.bookingId)}>
+          <Text style={styles.buttonText}>View Details</Text>
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.navIcon}>🔍</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={[styles.navIcon, styles.activeNavIcon]}>📅</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.navIcon}>👤</Text>
+
+        <TouchableOpacity style={styles.cancelButton} onPress={() => handleCancelBooking(item.bookingId)}>
+          <Text style={styles.buttonText}>Cancel Booking</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
+  if (error) {
+    return <Text style={styles.errorText}>{error}</Text>;
+  }
+
+  return (
+    <View style={styles.container}>
+      {/* Tabs for Upcoming and Completed */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tabButton, selectedTab === 'Upcoming' && styles.activeTab]}
+          onPress={() => setSelectedTab('Upcoming')}
+        >
+          <Text style={styles.tabText}>Upcoming</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabButton, selectedTab === 'Completed' && styles.activeTab]}
+          onPress={() => setSelectedTab('Completed')}
+        >
+          <Text style={styles.tabText}>Completed</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* List of bookings filtered based on the selected tab */}
+      <FlatList
+        data={filteredBookings}
+        keyExtractor={(item) => item.bookingId}
+        renderItem={renderBookingItem}
+        ListEmptyComponent={<Text>No bookings found</Text>}
+      />
+      <Footer navigation={navigation} />
+    </View>
+  );
 };
 
-
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    padding: 16,
+    backgroundColor: '#fff',
   },
-  header: {
-    fontSize: 24,
-    textAlign: 'center',
-    marginVertical: 20,
-    fontWeight: 'bold',
-  },
-  tabs: {
+  tabContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 10,
+    justifyContent: 'space-around',
+    marginBottom: 16,
   },
-  tab: {
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    borderRadius: 20,
-    backgroundColor: '#f2f2f2',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginHorizontal: 10,
-  },
-  tabText: {
-    color: '#666',
+  tabButton: {
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
   },
   activeTab: {
-    backgroundColor: '#4caf50',
+    backgroundColor: '#4CAF50',
   },
-  activeTabText: {
-    color: '#fff',
+  tabText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   bookingCard: {
-    backgroundColor: '#fff',
-    margin: 10,
-    padding: 15,
-    borderRadius: 10,
+    padding: 16,
+    marginVertical: 8,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
     shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  bookingDate: {
-    fontSize: 14,
-    color: '#777',
-  },
-  gymDetails: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  gymImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginRight: 10,
+    shadowRadius: 4,
+    elevation: 2,
   },
   gymName: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 8,
   },
-  gymLocation: {
-    fontSize: 14,
-    color: '#777',
-  },
-  rating: {
-    fontSize: 14,
-    color: '#ff9800',
-  },
-  invites: {
-    fontSize: 14,
-    color: '#666',
-  },
-  bookingActions: {
+  buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 20,
+    marginTop: 10,
+  },
+  viewDetailsButton: {
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    flex: 1,
+    marginRight: 10,
   },
   cancelButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    borderColor: '#4caf50',
-    borderWidth: 1,
+    padding: 10,
+    backgroundColor: '#ff1744',
+    borderRadius: 8,
+    flex: 1,
   },
-  cancelButtonText: {
-    color: '#4caf50',
-  },
-  detailsButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    backgroundColor: '#4caf50',
-  },
-  detailsButtonText: {
+  buttonText: {
     color: '#fff',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
-  addMore: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  addMoreBtn: {
-    backgroundColor: '#4caf50',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 5,
-  },
-  addMoreBtnText: {
-    color: '#fff',
-  },
-  inviteCount: {
-    marginHorizontal: 10,
+  errorText: {
+    color: 'red',
     fontSize: 16,
-    color: '#000',
-  },
-  bottomNavigation: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    backgroundColor: '#000',
-  },
-  navIcon: {
-    color: '#fff',
-    fontSize: 24,
-  },
-  activeNavIcon: {
-    color: '#4caf50',
+    textAlign: 'center',
   },
 });
 
-
-export default MyBookings;
+export default BookingScreen;

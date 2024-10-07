@@ -24,7 +24,10 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator 
+        initialRouteName="Login"
+        screenOptions={{ headerShown: false }} // Hide headers for all screens
+      >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="GymList" component={GymListScreen} />
@@ -42,7 +45,6 @@ export default function App() {
         <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
         <Stack.Screen name="InviteFriendBuddy" component={InviteFriendBuddiesScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
-
       </Stack.Navigator>
     </NavigationContainer>
   );
