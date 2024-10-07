@@ -4,6 +4,7 @@ import { fetchIndividualGymData } from '../api/apiService';
 import SlotSelectionScreen from './SlotSelectionScreen';
 import AmenitiesListPopup from '../components/AmenitiesListPopup';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import CustomHeader from '../components/Header';
 
 // Get screen width
 const screenWidth = Dimensions.get('window').width;
@@ -77,6 +78,7 @@ const GymDetailScreen = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
+      <CustomHeader />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}

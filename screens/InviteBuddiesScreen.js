@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Footer from '../components/Footer';
 import { fetchAllNearByUser } from '../api/apiService';
 import { addFriend } from '../api/apiService'; // Import the addFriend function
+import CustomHeader from '../components/Header';
 
 const InviteBuddiesScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
@@ -97,6 +98,7 @@ const InviteBuddiesScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <CustomHeader />
       <View style={styles.header}>
         <Text><Icon name="dumbbell" size={40} color="#fff" /></Text>
         <View>
