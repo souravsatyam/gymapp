@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import * as NavigationBar from "expo-navigation-bar";
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import GymListScreen from './screens/GymListScreen';
@@ -22,6 +23,10 @@ import SettingsScreen from './screens/SettingsScreen';
 const Stack = createStackNavigator();
 
 export default function App() {
+
+  React.useEffect(() => {
+    NavigationBar.setVisibilityAsync("hidden");
+  }, []) 
   return (
     <NavigationContainer>
       <Stack.Navigator 

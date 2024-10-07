@@ -39,11 +39,14 @@ export default function GymListScreen({ navigation }) {
     setLoading(true);
     try {
       const gymList = await fetchAllGyms(lat, long, searchText, limit, page);
-
+  
       if (gymList.length > 0) {
-        setGyms(gymList); // Append gyms to the existing list
-      }  else {
-        setHasMoreGyms(false); // No more gyms to load
+        setGyms(prevGyms => {
+          const newGyms = gymList.filter(gym => !prevGyms.some(prevGym => prevGym.gymId === gym.gymId));
+          return [...prevGyms, ...newGyms];
+        });
+      } else {
+        setHasMoreGyms(false);
       }
     } catch (error) {
       console.error('Error fetching gyms:', error);
@@ -98,8 +101,13 @@ export default function GymListScreen({ navigation }) {
   };
 
   useEffect(() => {
-    getLocation(); // Get the current location when the component mounts
-    fetchUserName(); // Fetch user's full name
+    const timer = setTimeout(() => {
+      getLocation(); // Get the current location when the component mounts
+      fetchUserName(); // Fetch user's full name
+    }, 500); // 500ms delay
+    
+    return () => clearTimeout(timer);
+    
   }, [searchText]); // Update gyms based on searchText
 
   // Triggered when the user scrolls to the end of the list to fetch the next page
@@ -136,7 +144,8 @@ export default function GymListScreen({ navigation }) {
   );
 
   return (
-    <KeyboardAvoidingView
+    <>
+    <View
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
@@ -169,12 +178,17 @@ export default function GymListScreen({ navigation }) {
         keyExtractor={(item) => item.gymId}
         renderItem={renderGym}
         contentContainerStyle={styles.gymList}
+        initialNumToRender={9}  // Initially render 10 items
+        maxToRenderPerBatch={9} 
         onEndReached={loadMoreGyms} // Load more gyms when scrolling
         onEndReachedThreshold={0.6} // Trigger when 50% away from the end
         ListFooterComponent={loading ? <Text>Loading more gyms...</Text> : null} // Loading indicator
+        
       />
-      <Footer navigation={navigation} />
-    </KeyboardAvoidingView>
+     
+    </View>
+    <Footer navigation={navigation} />
+    </>
   );
 }
 
