@@ -38,7 +38,7 @@ const RegisterScreen = ({ navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="Full Name"
-        placeholderTextColor="#fff" // White placeholder for better visibility
+        placeholderTextColor='#808080' // light grey placeholder for better visibility
         value={fullName}
         onChangeText={setFullName} // Update fullName state
       />
@@ -47,7 +47,7 @@ const RegisterScreen = ({ navigation }) => {
         placeholder="Mobile Number"
         keyboardType="phone-pad"
         maxLength={10} // Assuming a 10-digit mobile number
-        placeholderTextColor="#fff" // White placeholder for better visibility
+        placeholderTextColor='#808080' // light grey placeholder for better visibility
         value={phoneNumber}
         onChangeText={setPhoneNumber} // Update phoneNumber state
       />
@@ -72,19 +72,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#000', // Black background
+    backgroundColor: '#FFFFFF', // white background
   },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
-  },
+
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
-    color: '#fff', // White text
+    color: '#0ED94A', // White text
   },
   subtitle: {
     fontSize: 16,
@@ -98,9 +94,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     padding: 15,
-    backgroundColor: '#333', // Dark gray input background
-    color: '#fff', // White text
+    backgroundColor: '#D3D3D3', // light gray input background
+    color: '#333', // White text
     marginBottom: 20,
+    fontSize: 18,
+    fontWeight:'bold',
   },
   button: {
     backgroundColor: '#28a745', // Green button color

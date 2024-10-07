@@ -20,7 +20,6 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import CustomHeader from '../components/Header';
 
-
 export default function GymListScreen({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [gyms, setGyms] = useState([]);
@@ -30,6 +29,7 @@ export default function GymListScreen({ navigation }) {
   const [loading, setLoading] = useState(false); // For loading spinner
   const [hasMoreGyms, setHasMoreGyms] = useState(true); // To stop fetching if no more data
   const [fullName, setFullName] = useState(''); // State for user's full name
+  const [isInputFocused, setIsInputFocused] = useState(false); // State to track input focus
 
   const limit = 9; // Number of gyms per page
 
@@ -42,7 +42,7 @@ export default function GymListScreen({ navigation }) {
 
       if (gymList.length > 0) {
         setGyms(gymList); // Append gyms to the existing list
-      }  else {
+      } else {
         setHasMoreGyms(false); // No more gyms to load
       }
     } catch (error) {
@@ -140,9 +140,6 @@ export default function GymListScreen({ navigation }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* <CustomHeader /> */}
-      {/* Custom header with greeting and search bar */}
-    
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.locationContainer}>
@@ -162,6 +159,8 @@ export default function GymListScreen({ navigation }) {
           placeholderTextColor="#ccc"
           value={searchText}
           onChangeText={setSearchText} // Update searchText state
+          onFocus={() => setIsInputFocused(true)} // Set focus to true when input is focused
+          onBlur={() => setIsInputFocused(false)} // Set focus to false when input is blurred
         />
       </View>
 
@@ -175,7 +174,8 @@ export default function GymListScreen({ navigation }) {
         onEndReachedThreshold={0.6} // Trigger when 50% away from the end
         ListFooterComponent={loading ? <Text>Loading more gyms...</Text> : null} // Loading indicator
       />
-      <Footer navigation={navigation} />
+      {/* Conditionally render the footer based on input focus */}
+      {!isInputFocused && <Footer navigation={navigation} />}
     </KeyboardAvoidingView>
   );
 }

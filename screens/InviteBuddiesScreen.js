@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, FlatList, Animated } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Footer from '../components/Footer';
 import { fetchAllNearByUser } from '../api/apiService';
 import { addFriend } from '../api/apiService'; // Import the addFriend function
-import CustomHeader from '../components/Header';
 
 const InviteBuddiesScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [buddyList, setBuddyList] = useState([]);
-  const [typedText, setTypedText] = useState(''); // State for typed text
-  const message = "Add users to collaborate for better gyming"; // The message to type out
-  const fadeAnim = useRef(new Animated.Value(1)).current; // Animated value for fading
+  const [isFooterVisible, setIsFooterVisible] = useState(true); // State to manage footer visibility
+  const message = "Add users to collaborate for better gyming"; // The message for placeholder
 
   // Fetch nearby users from the API
   const fetchNearbyUsers = async () => {
@@ -25,15 +23,7 @@ const InviteBuddiesScreen = ({ navigation }) => {
 
   useEffect(() => {
     fetchNearbyUsers();
-    typeMessage();
   }, []);
-
-  const typeMessage = (index = 0) => {
-    if (index < message.length) {
-      setTypedText(prev => prev + message[index]);
-      setTimeout(() => typeMessage(index + 1), 100);
-    }
-  };
 
   const handleInvite = async (id) => {
     try {
@@ -48,18 +38,6 @@ const InviteBuddiesScreen = ({ navigation }) => {
   const searchUser = async (user) => {
     setSearchText(user);
     fetchNearbyUsers();
-
-    if (user) {
-      setTypedText('');
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      setTypedText(message);
-      fadeAnim.setValue(1);
-    }
   };
 
   const renderBuddy = ({ item }) => (
@@ -69,7 +47,7 @@ const InviteBuddiesScreen = ({ navigation }) => {
         <Text style={styles.buddyName}>{item.name}</Text>
         <Text style={styles.username}>{item.username}</Text>
       </View>
-   
+
       {(item?.invited?.accepted) && (
         <TouchableOpacity style={styles.invitedButton}>
           <Text style={styles.invitedButtonText}>Friends</Text>
@@ -96,8 +74,7 @@ const InviteBuddiesScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
-      <CustomHeader />
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <View style={styles.header}>
         <Text><Icon name="dumbbell" size={40} color="#fff" /></Text>
       </View>
@@ -109,24 +86,33 @@ const InviteBuddiesScreen = ({ navigation }) => {
           style={styles.searchInput}
           value={searchText}
           onChangeText={(text) => searchUser(text)}
+          onFocus={() => setIsFooterVisible(false)} // Hide footer on focus
+          onBlur={() => setIsFooterVisible(true)} // Show footer on blur
+          placeholder={message} // Use the message as placeholder
+          placeholderTextColor="#D3D3D3" // Adjust the color of the placeholder text if needed
         />
-        <Animated.Text style={[styles.movingText, { opacity: fadeAnim }]}>{typedText}</Animated.Text>
       </View>
 
       {/* Buddy List */}
-      {buddyList.length > 0 ? (
+      <View style={styles.listContainer}>
         <FlatList
           data={buddyList.filter((buddy) => buddy.name.toLowerCase().includes(searchText.toLowerCase()))}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderBuddy}
           contentContainerStyle={styles.buddyList}
+          ListEmptyComponent={renderEmptyList} // Use ListEmptyComponent for no data scenario
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled" // Ensures that taps are handled even when the keyboard is up
         />
-      ) : (
-        renderEmptyList()
-      )}
+      </View>
 
-      <Footer navigation={navigation} />
-    </View>
+      {/* Conditional rendering of Footer */}
+      {isFooterVisible && (
+        <View style={styles.footer}>
+          <Footer navigation={navigation} />
+        </View>
+      )}
+    </KeyboardAvoidingView>
   );
 };
 
@@ -135,10 +121,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  header: {
+    // Add any styles you want for the header
+  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
     padding: 6,
     margin: 16,
     borderRadius: 8,
@@ -152,13 +140,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  movingText: {
-    color: '#D3D3D3',
-    fontSize: 14,
-    marginLeft: 4,
-    position: 'absolute',
-    left: 50,
-    top: 10,
+  listContainer: {
+    flex: 1,
+    paddingBottom: 80, // Add padding for the footer
   },
   buddyList: {
     padding: 16,
@@ -169,7 +153,6 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 8,
     marginBottom: 4,
-    backgroundColor: '#F5F5F5',
   },
   buddyImage: {
     width: 40,
@@ -221,6 +204,13 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 10,
     fontWeight: 'bold',
+  },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    // Additional styles if necessary
   },
 });
 
