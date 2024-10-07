@@ -17,7 +17,6 @@ const InviteBuddiesScreen = ({ navigation }) => {
   const fetchNearbyUsers = async () => {
     try {
       const data = await fetchAllNearByUser(searchText);
-      // Ensure data is an array before setting the buddy list
       setBuddyList(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching nearby users:', error);
@@ -25,25 +24,21 @@ const InviteBuddiesScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    // Fetch users on component mount
     fetchNearbyUsers();
-    // Start typing effect when the component mounts
     typeMessage();
   }, []);
 
   const typeMessage = (index = 0) => {
     if (index < message.length) {
-      setTypedText(prev => prev + message[index]); // Add next character
-      setTimeout(() => typeMessage(index + 1), 100); // Speed up typing effect to 100ms
+      setTypedText(prev => prev + message[index]);
+      setTimeout(() => typeMessage(index + 1), 100);
     }
   };
 
-  // Handle inviting a buddy
   const handleInvite = async (id) => {
     try {
-      const response = await addFriend(id); // Call the API to send a friend request
+      const response = await addFriend(id); 
       console.log('Friend request sent:', response);
-      // Update the invited status in the UI
       fetchNearbyUsers();
     } catch (error) {
       console.error('Error inviting friend:', error);
@@ -54,23 +49,19 @@ const InviteBuddiesScreen = ({ navigation }) => {
     setSearchText(user);
     fetchNearbyUsers();
 
-    // Hide the default message and start fading out the moving text
     if (user) {
-      setTypedText(''); // Clear typed text when user starts typing
+      setTypedText('');
       Animated.timing(fadeAnim, {
-        toValue: 0, // Fade out
-        duration: 300, // Duration of fade out
+        toValue: 0,
+        duration: 300,
         useNativeDriver: true,
-      }).start(() => {
-        // Optional: Clear the text after fading out if needed
-      });
+      }).start();
     } else {
-      setTypedText(message); // Reset to original message if input is cleared
-      fadeAnim.setValue(1); // Reset opacity
+      setTypedText(message);
+      fadeAnim.setValue(1);
     }
   };
 
-  // Render a buddy
   const renderBuddy = ({ item }) => (
     <View style={styles.buddyItem}>
       <Image source={{ uri: item.image }} style={styles.buddyImage} />
@@ -78,7 +69,8 @@ const InviteBuddiesScreen = ({ navigation }) => {
         <Text style={styles.buddyName}>{item.name}</Text>
         <Text style={styles.username}>{item.username}</Text>
       </View>
-      {(item?.invited?.sent && item?.invited?.accepted) && (
+   
+      {(item?.invited?.accepted) && (
         <TouchableOpacity style={styles.invitedButton}>
           <Text style={styles.invitedButtonText}>Friends</Text>
         </TouchableOpacity>
@@ -96,14 +88,18 @@ const InviteBuddiesScreen = ({ navigation }) => {
     </View>
   );
 
+  const renderEmptyList = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>No users found</Text>
+      <Icon name="emoticon-sad-outline" size={48} color="#66BB6A" />
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <CustomHeader />
       <View style={styles.header}>
         <Text><Icon name="dumbbell" size={40} color="#fff" /></Text>
-        <View>
-          {/* Optional header text can go here */}
-        </View>
       </View>
 
       {/* Search bar */}
@@ -111,8 +107,6 @@ const InviteBuddiesScreen = ({ navigation }) => {
         <Text><Icon name="magnify" size={24} color="#888" /></Text>
         <TextInput
           style={styles.searchInput}
-          //placeholder="Search user..."
-          //placeholderTextColor="#8BC34A" // Light green color for placeholder
           value={searchText}
           onChangeText={(text) => searchUser(text)}
         />
@@ -120,12 +114,17 @@ const InviteBuddiesScreen = ({ navigation }) => {
       </View>
 
       {/* Buddy List */}
-      <FlatList
-        data={buddyList?.filter((buddy) => buddy.name.toLowerCase().includes(searchText.toLowerCase()))}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderBuddy}
-        contentContainerStyle={styles.buddyList}
-      />
+      {buddyList.length > 0 ? (
+        <FlatList
+          data={buddyList.filter((buddy) => buddy.name.toLowerCase().includes(searchText.toLowerCase()))}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderBuddy}
+          contentContainerStyle={styles.buddyList}
+        />
+      ) : (
+        renderEmptyList()
+      )}
+
       <Footer navigation={navigation} />
     </View>
   );
@@ -152,16 +151,14 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
     color: '#333',
-    fontWeight: 'normal', // No bold font weight
   },
   movingText: {
-    color: '#D3D3D3', // Color of the moving text
-    //fontWeight: 'bold',
+    color: '#D3D3D3',
     fontSize: 14,
-    marginLeft: 4, // Space between the icon and moving text
+    marginLeft: 4,
     position: 'absolute',
-    left: 50, // Position next to the search icon
-    top: 10, // Adjust this as needed to align with the search input
+    left: 50,
+    top: 10,
   },
   buddyList: {
     padding: 16,
@@ -172,6 +169,7 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 8,
     marginBottom: 4,
+    backgroundColor: '#F5F5F5',
   },
   buddyImage: {
     width: 40,
@@ -210,6 +208,18 @@ const styles = StyleSheet.create({
   },
   invitedButtonText: {
     color: '#fff',
+    fontWeight: 'bold',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  emptyText: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 10,
     fontWeight: 'bold',
   },
 });

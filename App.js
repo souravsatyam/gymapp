@@ -25,7 +25,7 @@ const Stack = createStackNavigator();
 export default function App() {
 
   React.useEffect(() => {
-    NavigationBar.setVisibilityAsync("hidden");
+    // NavigationBar.setVisibilityAsync("hidden");
   }, []) 
   return (
     <NavigationContainer>
