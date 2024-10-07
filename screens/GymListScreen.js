@@ -39,14 +39,11 @@ export default function GymListScreen({ navigation }) {
     setLoading(true);
     try {
       const gymList = await fetchAllGyms(lat, long, searchText, limit, page);
-  
+
       if (gymList.length > 0) {
-        setGyms(prevGyms => {
-          const newGyms = gymList.filter(gym => !prevGyms.some(prevGym => prevGym.gymId === gym.gymId));
-          return [...prevGyms, ...newGyms];
-        });
-      } else {
-        setHasMoreGyms(false);
+        setGyms(gymList); // Append gyms to the existing list
+      }  else {
+        setHasMoreGyms(false); // No more gyms to load
       }
     } catch (error) {
       console.error('Error fetching gyms:', error);
@@ -101,13 +98,8 @@ export default function GymListScreen({ navigation }) {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      getLocation(); // Get the current location when the component mounts
-      fetchUserName(); // Fetch user's full name
-    }, 500); // 500ms delay
-    
-    return () => clearTimeout(timer);
-    
+    getLocation(); // Get the current location when the component mounts
+    fetchUserName(); // Fetch user's full name
   }, [searchText]); // Update gyms based on searchText
 
   // Triggered when the user scrolls to the end of the list to fetch the next page
@@ -144,8 +136,7 @@ export default function GymListScreen({ navigation }) {
   );
 
   return (
-    <>
-    <View
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
@@ -160,7 +151,9 @@ export default function GymListScreen({ navigation }) {
               {address || 'Fetching location...'}
             </Text>
           </View>
-          
+          <TouchableOpacity onPress={() => navigation.navigate('NotificationListScreen')}>
+            <Icon name="bell" size={24} color="#fff" />
+          </TouchableOpacity>
         </View>
         <Text style={styles.greetingText}>Hey {fullName}, looking for a gym or a workout buddy?</Text>
         <TextInput
@@ -178,17 +171,12 @@ export default function GymListScreen({ navigation }) {
         keyExtractor={(item) => item.gymId}
         renderItem={renderGym}
         contentContainerStyle={styles.gymList}
-        initialNumToRender={9}  // Initially render 10 items
-        maxToRenderPerBatch={9} 
         onEndReached={loadMoreGyms} // Load more gyms when scrolling
         onEndReachedThreshold={0.6} // Trigger when 50% away from the end
         ListFooterComponent={loading ? <Text>Loading more gyms...</Text> : null} // Loading indicator
-        
       />
-     
-    </View>
-    <Footer navigation={navigation} />
-    </>
+      <Footer navigation={navigation} />
+    </KeyboardAvoidingView>
   );
 }
 
