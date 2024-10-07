@@ -100,11 +100,12 @@ export const verifyOtp = async (mobileNumber, otp) => {
 
 
   export const fetchAllNearByUser = async (searchText = '') => {
+    console.log("Search Text received", searchText);
     try {
       const userToken = await AsyncStorage.getItem('authToken'); // Fetch token if needed
       const endpoint = searchText
       ? `${BASE_URL}/users/search/${searchText}`
-      : `${BASE_URL}/users/nearby-users?lat=12.9716&long=77.5946`;
+      : `${BASE_URL}/users/nearby-users`;
       const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
@@ -112,17 +113,22 @@ export const verifyOtp = async (mobileNumber, otp) => {
         },
       });
       const data = await response.json();
-      console.log()
-      const formattedBuddies = data.map(user => ({
-        id: user.id,
-        name: user.full_name,
-        username: user.username,
-        status: user.is_selected ? 'Available' : 'Unavailable',
-        image: user.profile_pic || 'https://via.placeholder.com/50', // Use a placeholder if no image
-        inGym: user.is_selected,
-        invited: user.friendRequestStatus,
-      }));
-      return formattedBuddies;
+      
+      if(!data.message) {
+        const formattedBuddies = data?.map(user => ({
+          id: user.id,
+          name: user.full_name,
+          username: user.username,
+          status: user.is_selected ? 'Available' : 'Unavailable',
+          image: user.profile_pic || 'https://via.placeholder.com/50', // Use a placeholder if no image
+          inGym: user.is_selected,
+          invited: user.friendRequestStatus,
+        }));
+        return formattedBuddies;
+      } else {
+        return [];
+      }
+      
     } catch (error) {
       console.error('Error fetching nearby users:', error);
     }

@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, FlatList, Animated } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Footer from '../components/Footer';
 import { fetchAllNearByUser } from '../api/apiService';
 import { addFriend } from '../api/apiService'; // Import the addFriend function
-//import CustomHeader from '../components/Header';
 
 const InviteBuddiesScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [buddyList, setBuddyList] = useState([]);
+  const [isFooterVisible, setIsFooterVisible] = useState(true); // State to manage footer visibility
+  const message = "Add users to collaborate for better gyming"; // The message for placeholder
 
   // Fetch nearby users from the API
   const fetchNearbyUsers = async () => {
     try {
       const data = await fetchAllNearByUser(searchText);
-      // Ensure data is an array before setting the buddy list
       setBuddyList(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching nearby users:', error);
@@ -22,16 +22,13 @@ const InviteBuddiesScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    // Fetch users on component mount
     fetchNearbyUsers();
   }, []);
 
-  // Handle inviting a buddy
   const handleInvite = async (id) => {
     try {
-      const response = await addFriend(id); // Call the API to send a friend request
+      const response = await addFriend(id); 
       console.log('Friend request sent:', response);
-      // Update the invited status in the UI
       fetchNearbyUsers();
     } catch (error) {
       console.error('Error inviting friend:', error);
@@ -43,7 +40,6 @@ const InviteBuddiesScreen = ({ navigation }) => {
     fetchNearbyUsers();
   };
 
-  // Render a buddy
   const renderBuddy = ({ item }) => (
     <View style={styles.buddyItem}>
       <Image source={{ uri: item.image }} style={styles.buddyImage} />
@@ -51,7 +47,8 @@ const InviteBuddiesScreen = ({ navigation }) => {
         <Text style={styles.buddyName}>{item.name}</Text>
         <Text style={styles.username}>{item.username}</Text>
       </View>
-      {(item?.invited?.sent && item?.invited?.accepted) && (
+
+      {(item?.invited?.accepted) && (
         <TouchableOpacity style={styles.invitedButton}>
           <Text style={styles.invitedButtonText}>Friends</Text>
         </TouchableOpacity>
@@ -69,37 +66,53 @@ const InviteBuddiesScreen = ({ navigation }) => {
     </View>
   );
 
+  const renderEmptyList = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>No users found</Text>
+      <Icon name="emoticon-sad-outline" size={48} color="#66BB6A" />
+    </View>
+  );
+
   return (
-    <View style={styles.container}>
-      {/* <CustomHeader /> */}
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <View style={styles.header}>
         <Text><Icon name="dumbbell" size={40} color="#fff" /></Text>
-        <View>
-          {/* Optional header text can go here */}
-        </View>
       </View>
 
       {/* Search bar */}
       <View style={styles.searchContainer}>
-        {/* <Text><Icon name="magnify" size={24} color="#888" /></Text> */}
+        <Text><Icon name="magnify" size={24} color="#888" /></Text>
         <TextInput
           style={styles.searchInput}
           value={searchText}
-          placeholder="Add users to collaborate for better gyming"
-          placeholderTextColor="#ccc"
           onChangeText={(text) => searchUser(text)}
+          onFocus={() => setIsFooterVisible(false)} // Hide footer on focus
+          onBlur={() => setIsFooterVisible(true)} // Show footer on blur
+          placeholder={message} // Use the message as placeholder
+          placeholderTextColor="#D3D3D3" // Adjust the color of the placeholder text if needed
         />
       </View>
 
       {/* Buddy List */}
-      <FlatList
-        data={buddyList?.filter((buddy) => buddy.name.toLowerCase().includes(searchText.toLowerCase()))}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderBuddy}
-        contentContainerStyle={styles.buddyList}
-      />
-      <Footer navigation={navigation} />
-    </View>
+      <View style={styles.listContainer}>
+        <FlatList
+          data={buddyList.filter((buddy) => buddy.name.toLowerCase().includes(searchText.toLowerCase()))}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderBuddy}
+          contentContainerStyle={styles.buddyList}
+          ListEmptyComponent={renderEmptyList} // Use ListEmptyComponent for no data scenario
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled" // Ensures that taps are handled even when the keyboard is up
+        />
+      </View>
+
+      {/* Conditional rendering of Footer */}
+      {isFooterVisible && (
+        <View style={styles.footer}>
+          <Footer navigation={navigation} />
+        </View>
+      )}
+    </KeyboardAvoidingView>
   );
 };
 
@@ -108,10 +121,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  header: {
+    // Add any styles you want for the header
+  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
     padding: 6,
     margin: 16,
     borderRadius: 8,
@@ -124,7 +139,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
     color: '#333',
-    fontWeight: 'normal', // No bold font weight
+  },
+  listContainer: {
+    flex: 1,
+    paddingBottom: 80, // Add padding for the footer
   },
   buddyList: {
     padding: 16,
@@ -174,6 +192,25 @@ const styles = StyleSheet.create({
   invitedButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  emptyText: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 10,
+    fontWeight: 'bold',
+  },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    // Additional styles if necessary
   },
 });
 
