@@ -140,7 +140,7 @@ export default function GymListScreen({ navigation }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <CustomHeader />
+      {/* <CustomHeader /> */}
       {/* Custom header with greeting and search bar */}
     
       <View style={styles.header}>
@@ -191,11 +191,13 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     elevation: 5,
+    height: 200,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 25,
   },
   locationContainer: {
     flexDirection: 'column',
