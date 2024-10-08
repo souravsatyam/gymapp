@@ -30,16 +30,16 @@ export default function GymListScreen({ navigation }) {
   const [hasMoreGyms, setHasMoreGyms] = useState(true); // To stop fetching if no more data
   const [fullName, setFullName] = useState(''); // State for user's full name
   const [isInputFocused, setIsInputFocused] = useState(false); // State to track input focus
+  const [pincode, setPincode] = useState(''); // State for user-entered pincode
 
   const limit = 9; // Number of gyms per page
 
-  // Fetch gyms based on latitude, longitude, search text, page, and limit
+  // Fetch gyms based on latitude, longitude, search text, pincode, page, and limit
   const fetchGyms = async (lat, long, searchText = '', page = 1) => {
     if ((loading || !hasMoreGyms) && !searchText) return; // Prevent further fetching if already loading or no more gyms
     setLoading(true);
     try {
-      const gymList = await fetchAllGyms(lat, long, searchText, limit, page);
-
+      const gymList = await fetchAllGyms(lat, long, searchText, limit, page, pincode); // Added pincode to the fetch
       if (gymList.length > 0) {
         setGyms(gymList); // Append gyms to the existing list
       } else {
@@ -100,7 +100,7 @@ export default function GymListScreen({ navigation }) {
   useEffect(() => {
     getLocation(); // Get the current location when the component mounts
     fetchUserName(); // Fetch user's full name
-  }, [searchText]); // Update gyms based on searchText
+  }, [searchText, pincode]); // Update gyms based on searchText and pincode
 
   // Triggered when the user scrolls to the end of the list to fetch the next page
   const loadMoreGyms = () => {
@@ -142,11 +142,20 @@ export default function GymListScreen({ navigation }) {
     >
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <View style={styles.locationContainer}>
+          {/* Wrap location text and pincode input together */}
+          <View style={styles.locationPincodeContainer}>
             <Text style={styles.locationText}>
               <MaterialIcon name="location-on" size={20} color="#fff" />
               {address || 'Fetching location...'}
             </Text>
+            <TextInput
+              style={styles.pincodeInput}
+              placeholder="Enter pincode"
+              placeholderTextColor="#ccc"
+              value={pincode}
+              onChangeText={setPincode}
+              keyboardType="numeric" // Set numeric keyboard
+            />
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('NotificationListScreen')}>
             <Icon name="bell" size={24} color="#fff" />
@@ -199,13 +208,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 25,
   },
-  locationContainer: {
-    flexDirection: 'column',
+  locationPincodeContainer: {
+    flexDirection: 'row', // Row direction to align location text and input
+    alignItems: 'center',
   },
   locationText: {
     fontSize: 14,
     color: '#fff',
     fontWeight: 'bold',
+  },
+  pincodeInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 5,
+    backgroundColor: '#fff',
+    width: 100, // Adjust width as necessary
+    textAlign: 'center',
+    marginLeft: 5,
+    height: 30, // Reduced margin to move closer to location text
   },
   greetingText: {
     fontSize: 18,

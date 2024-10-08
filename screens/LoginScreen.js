@@ -33,8 +33,8 @@ const LoginScreen = ({ navigation }) => {
       />
 
       {/* Welcome Text */}
-      <Text style={styles.title}>Welcome back! Glad to see you, Again!</Text>
-      <Text style={styles.subtitle}>Book Your Workout Anytime, Anywhere</Text>
+      <Text style={styles.title}>Welcome To YUPLUCK</Text>
+      <Text style={styles.subtitle}>your instant GYM booking platform!</Text>
 
       <TextInput
         style={styles.input}
