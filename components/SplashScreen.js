@@ -5,7 +5,7 @@ const SplashScreen = ({ navigation }) => {
   useEffect(() => {
     // Simulate loading time before moving to the next screen
     const timer = setTimeout(() => {
-      navigation.replace('Home'); // Replace with the actual route name
+      navigation.replace('Login'); // Replace with the actual route name
     }, 3000); // Show splash screen for 3 seconds
 
     return () => clearTimeout(timer); // Clear timer on component unmount

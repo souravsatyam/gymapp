@@ -9,15 +9,16 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
-import { fetchAllGyms } from '../api/apiService';  // Assumed to be paginated (limit & page supported)
+import { fetchAllGyms } from '../api/apiService';
 import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import Footer from '../components/Footer';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import CustomHeader from '../components/Header';
 
 export default function GymListScreen({ navigation }) {
@@ -25,53 +26,57 @@ export default function GymListScreen({ navigation }) {
   const [gyms, setGyms] = useState([]);
   const [currentLocation, setCurrentLocation] = useState('');
   const [address, setAddress] = useState('');
-  const [page, setPage] = useState(1); // Initialize page number
-  const [loading, setLoading] = useState(false); // For loading spinner
-  const [hasMoreGyms, setHasMoreGyms] = useState(true); // To stop fetching if no more data
-  const [fullName, setFullName] = useState(''); // State for user's full name
-  const [isInputFocused, setIsInputFocused] = useState(false); // State to track input focus
-  const [pincode, setPincode] = useState(''); // State for user-entered pincode
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false); 
+  const [hasMoreGyms, setHasMoreGyms] = useState(true);
+  const [fullName, setFullName] = useState(''); 
+  const [isInputFocused, setIsInputFocused] = useState(false); 
+  const [pincode, setPincode] = useState('');
+  const [error, setError] = useState('');
+  const limit = 9;
 
-  const limit = 9; // Number of gyms per page
+  const GOOGLE_MAPS_API_KEY = '<<API_KEY>>';  // Replace with your actual API key
 
-  // Fetch gyms based on latitude, longitude, search text, pincode, page, and limit
   const fetchGyms = async (lat, long, searchText = '', page = 1) => {
-    if ((loading || !hasMoreGyms) && !searchText) return; // Prevent further fetching if already loading or no more gyms
+    if ((loading || !hasMoreGyms) && !searchText) return; 
     setLoading(true);
+    setError('');
     try {
-      const gymList = await fetchAllGyms(lat, long, searchText, limit, page, pincode); // Added pincode to the fetch
+      const gymList = await fetchAllGyms(lat, long, searchText, limit, page, pincode);
       if (gymList.length > 0) {
-        setGyms(gymList); // Append gyms to the existing list
+        setGyms((prevGyms) => [...prevGyms, ...gymList]);
       } else {
-        setHasMoreGyms(false); // No more gyms to load
+        setHasMoreGyms(false); 
       }
     } catch (error) {
       console.error('Error fetching gyms:', error);
+      setError('Failed to fetch gyms. Please check your network connection.');
+      Alert.alert('Error', 'Failed to load gyms. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Get current location and address
   const getLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permission Denied', 'Location permission is required to access your location.');
+        setError('Location permission denied.');
         return;
       }
 
       const location = await Location.getCurrentPositionAsync({});
-      fetchGyms(location.coords.latitude, location.coords.longitude, searchText, page); // Pass searchText and initial page
+      fetchGyms(location.coords.latitude, location.coords.longitude, searchText, page);
       fetchAddress(location.coords.latitude, location.coords.longitude);
     } catch (error) {
-      fetchGyms(); // Fetch gyms without location if location access fails
       console.error('Error getting location:', error);
+      setError('Failed to retrieve location. Please try again.');
       Alert.alert('Error', 'Could not retrieve location. Please try again later.');
+      fetchGyms(); 
     }
   };
 
-  // Fetch address based on latitude and longitude
   const fetchAddress = async (lat, long) => {
     try {
       const response = await axios.get(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${long}&localityLanguage=en`);
@@ -81,32 +86,68 @@ export default function GymListScreen({ navigation }) {
     } catch (error) {
       console.error('Error fetching address:', error);
       setAddress('Error fetching address');
+      setError('Unable to retrieve address details.');
     }
   };
 
-  // Fetch user's full name from AsyncStorage
   const fetchUserName = async () => {
     try {
-      const user = await AsyncStorage.getItem('user'); // Assuming user info is stored in 'user'
+      const user = await AsyncStorage.getItem('user');
       if (user) {
         const userInfo = JSON.parse(user);
-        setFullName(userInfo.full_name || ''); // Update full name
+        setFullName(userInfo.full_name || ''); 
       }
     } catch (error) {
       console.error('Error fetching user name:', error);
+      setError('Unable to load user details.');
     }
   };
 
-  useEffect(() => {
-    getLocation(); // Get the current location when the component mounts
-    fetchUserName(); // Fetch user's full name
-  }, [searchText, pincode]); // Update gyms based on searchText and pincode
+  // Function to fetch latitude and longitude based on pincode
+  const fetchLatLongFromPincode = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${pincode}&key=${GOOGLE_MAPS_API_KEY}`);
+      if (response.data.results && response.data.results.length > 0) {
+        const location = response.data.results[0].geometry.location;
+        setCurrentLocation(location); 
+        fetchGyms(location.lat, location.lng, searchText, 1); // Fetch gyms for the new location
+      } else {
+        setError('Invalid pincode or no results found.');
+        Alert.alert('Invalid Pincode', 'Could not retrieve location for the given pincode.');
+      }
+    } catch (error) {
+      console.error('Error fetching location from pincode:', error);
+      setError('Failed to retrieve location. Please try again.');
+      Alert.alert('Error', 'Could not retrieve location for the entered pincode.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Triggered when the user scrolls to the end of the list to fetch the next page
+  const validatePincode = () => {
+    if (!pincode || pincode.length !== 6 || isNaN(pincode)) {
+      Alert.alert('Invalid Pincode', 'Please enter a valid 6-digit pincode.');
+      return false;
+    }
+    return true;
+  };
+
+  useEffect(() => {
+    getLocation();
+    fetchUserName(); 
+  }, []);
+
+  useEffect(() => {
+    if (validatePincode()) {
+      fetchLatLongFromPincode();  // Fetch location based on pincode when changed
+    }
+  }, [pincode]);
+
   const loadMoreGyms = () => {
-    console.log("Load More Gyms");
     if (hasMoreGyms && !loading) {
-      setPage(prevPage => prevPage + 1); // Increment the page number
+      setPage(prevPage => prevPage + 1); 
     }
   };
 
@@ -114,7 +155,6 @@ export default function GymListScreen({ navigation }) {
     navigation.navigate('GymDetails', { gym_id: gymId });
   };
 
-  // Render each gym
   const renderGym = ({ item }) => (
     <TouchableOpacity style={styles.gymCard} onPress={() => redirectToGymDetails(item.gymId)}>
       <Image source={{ uri: item.images?.[0]?.imageUrl || 'https://www.hussle.com/blog/wp-content/uploads/2020/12/Gym-structure-1080x675.png' }} style={styles.gymImage} />
@@ -142,7 +182,6 @@ export default function GymListScreen({ navigation }) {
     >
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          {/* Wrap location text and pincode input together */}
           <View style={styles.locationPincodeContainer}>
             <Text style={styles.locationText}>
               <MaterialIcon name="location-on" size={20} color="#fff" />
@@ -154,7 +193,7 @@ export default function GymListScreen({ navigation }) {
               placeholderTextColor="#ccc"
               value={pincode}
               onChangeText={setPincode}
-              keyboardType="numeric" // Set numeric keyboard
+              keyboardType="numeric"
             />
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('NotificationListScreen')}>
@@ -167,24 +206,24 @@ export default function GymListScreen({ navigation }) {
           placeholder="Search nearby gyms"
           placeholderTextColor="#ccc"
           value={searchText}
-          onChangeText={setSearchText} // Update searchText state
-          onFocus={() => setIsInputFocused(true)} // Set focus to true when input is focused
-          onBlur={() => setIsInputFocused(false)} // Set focus to false when input is blurred
+          onChangeText={setSearchText}
+          onFocus={() => setIsInputFocused(true)} 
+          onBlur={() => setIsInputFocused(false)} 
         />
       </View>
 
-      {/* Display filtered gyms */}
+      {loading && <ActivityIndicator size="large" color="#f4511e" style={styles.loader} />}
+      {error && <Text style={styles.errorMessage}>{error}</Text>}
+
       <FlatList
         data={gyms}
-        keyExtractor={(item) => item.gymId}
         renderItem={renderGym}
-        contentContainerStyle={styles.gymList}
-        onEndReached={loadMoreGyms} // Load more gyms when scrolling
-        onEndReachedThreshold={0.6} // Trigger when 50% away from the end
-        ListFooterComponent={loading ? <Text>Loading more gyms...</Text> : null} // Loading indicator
+        keyExtractor={(item, index) => `${item.gymId}-${index}`}
+        onEndReached={loadMoreGyms}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={hasMoreGyms && !loading ? <Text style={styles.loadMoreText}>Loading more gyms...</Text> : null}
       />
-      {/* Conditionally render the footer based on input focus */}
-      {!isInputFocused && <Footer navigation={navigation} />}
+      <Footer />
     </KeyboardAvoidingView>
   );
 }
@@ -192,106 +231,110 @@ export default function GymListScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   header: {
-    padding: 20,
     backgroundColor: '#4CAF50',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    elevation: 5,
-    height: 200,
+    padding: 15,
+    paddingBottom: 10,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 25,
   },
   locationPincodeContainer: {
-    flexDirection: 'row', // Row direction to align location text and input
+    flexDirection: 'row',
     alignItems: 'center',
   },
   locationText: {
-    fontSize: 14,
     color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 16,
+    marginRight: 10,
   },
   pincodeInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 5,
     backgroundColor: '#fff',
-    width: 100, // Adjust width as necessary
+    color: '#333',
+    padding: 10,
+    borderRadius: 5,
+    width: 100,
     textAlign: 'center',
-    marginLeft: 5,
-    height: 30, // Reduced margin to move closer to location text
+    fontSize: 16,
   },
   greetingText: {
-    fontSize: 18,
-    fontWeight: 'bold',
     color: '#fff',
-    textAlign: 'center',
-    marginVertical: 10,
+    fontSize: 18,
+    marginTop: 10,
   },
   searchInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 10,
     backgroundColor: '#fff',
-  },
-  gymList: {
-    paddingBottom: 80, // Add some padding at the bottom
+    color: '#333',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
   },
   gymCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    elevation: 2,
-    margin: 10,
     padding: 10,
+    margin: 10,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    elevation: 3,
   },
   gymImage: {
     width: 100,
     height: 100,
     borderRadius: 10,
+    marginRight: 10,
   },
   gymInfo: {
-    marginLeft: 10,
     flex: 1,
+    justifyContent: 'space-between',
   },
   gymName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   gymDescription: {
     fontSize: 14,
-    color: '#777',
+    color: '#666',
   },
   gymPrice: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4CAF50',
+    fontSize: 14,
+    color: '#f4511e',
   },
   gymDistance: {
-    fontSize: 14,
-    color: '#777',
+    fontSize: 12,
+    color: '#999',
   },
   gymRating: {
-    fontSize: 14,
-    color: '#777',
+    fontSize: 12,
+    color: '#333',
   },
   bookNowButton: {
     backgroundColor: '#4CAF50',
-    borderRadius: 10,
-    padding: 10,
-    alignItems: 'center',
-    marginTop: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    alignSelf: 'flex-start',
   },
   bookNowText: {
     color: '#fff',
+    fontSize: 14,
     fontWeight: 'bold',
+  },
+  loader: {
+    marginVertical: 20,
+  },
+  errorMessage: {
+    color: '#f00',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  loadMoreText: {
+    textAlign: 'center',
+    paddingVertical: 10,
+    fontSize: 16,
+    color: '#666',
   },
 });
