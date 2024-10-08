@@ -1,186 +1,319 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
-import axios from 'axios';
-import { fetchAllBookings } from '../api/apiService';
+import React, { useState } from 'react';
 import Footer from '../components/Footer';
-import CustomHeader from '../components/Header';
 
-const BookingScreen = ({navigation}) => {
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedTab, setSelectedTab] = useState('Upcoming'); // State for tab selection
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Image,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
-  // Fetch booking data from API
-  const fetchBookings = async () => {
-    try {
-      const response = await fetchAllBookings();
+export default function BookingsScreen({ navigation }) { // Make sure navigation is passed
+  const [selectedTab, setSelectedTab] = useState('Upcoming');
 
-      setBookings(response.Booking); // Update state with booking data
-      setLoading(false);
-    } catch (err) {
-      setError('Failed to fetch data');
-      setLoading(false);
-    }
-  };
+  const bookings = [
+    {
+      id: '1',
+      gymName: 'FitZone Gym',
+      location: 'Fitness Gym, Downtown',
+      rating: 4.5,
+      reviews: 120,
+      invites: 2,
+      date: 'April 26, 2023',
+      time: '10:00 PM - 03:00 PM',
+      imageUrl: 'https://via.placeholder.com/100',
+      bookingId: 'BK12345',
+      price: 30,  // Add price here
+        // Add booking ID here
+    },
+    {
+      id: '2',
+      gymName: 'FitZone Gym',
+      location: 'Fitness Gym, Downtown',
+      rating: 4.5,
+      reviews: 120,
+      invites: 2,
+      date: 'April 26, 2023',
+      time: '10:00 PM - 03:00 PM',
+      imageUrl: 'https://via.placeholder.com/100',
+      bookingId: 'BK12346',
+      price: 30,  // Add price here
+        // Add booking ID here
+    },
+  ];
 
-  useEffect(() => {
-    fetchBookings(); // Fetch bookings on component mount
-  }, []);
-
-  // Helper function to determine if the booking is upcoming or completed
-  const isUpcoming = (bookingDate) => {
-    const today = new Date();
-    const bookingDay = new Date(bookingDate);
-    return bookingDay >= today; // Future or today
-  };
-
-  // Filter bookings based on selected tab (Upcoming or Completed)
-  const filteredBookings = bookings.filter((item) => {
-    return selectedTab === 'Upcoming' ? isUpcoming(item.bookingDate) : !isUpcoming(item.bookingDate);
-  });
-
-  // Handler for View Details button
-  const handleViewDetails = (bookingId) => {
-    console.log('View details for:', bookingId);
-    // Navigate to booking details page or show more information
-  };
-
-  // Handler for Cancel Booking button
-  const handleCancelBooking = (bookingId) => {
-    console.log('Cancel booking:', bookingId);
-    // Implement cancel booking logic
-  };
-
-  // Render each booking item with View Details and Cancel Booking buttons
-  const renderBookingItem = ({ item }) => (
+  const renderBooking = ({ item }) => (
     <View style={styles.bookingCard}>
-      <Text style={styles.gymName}>{item.gymName}</Text>
-      <Text>Date: {item.bookingDate}</Text>
-      <Text>Start Time: {item.slotStartTime}</Text>
-      <Text>Subscription Price: {item.subscriptionPrice}</Text>
-      <Text>Buddies Invited: {item.invitedBuddyCount}</Text>
-      
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.viewDetailsButton} onPress={() => handleViewDetails(item.bookingId)}>
-          <Text style={styles.buttonText}>View Details</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.cancelButton} onPress={() => handleCancelBooking(item.bookingId)}>
-          <Text style={styles.buttonText}>Cancel Booking</Text>
-        </TouchableOpacity>
+      <View style={styles.cardHeader}>
+        <Text style={styles.bookingDate}>Booking Date: {item.date}, {item.time}</Text>
+        <View style={styles.locationContainer}>
+          <MaterialIcon name="location-on" size={16} color="#777" />
+          <Text style={styles.locationText}>{item.location}</Text>
+        </View>
       </View>
+
+      <View style={styles.cardBody}>
+        <Image source={{ uri: item.imageUrl }} style={styles.gymImage} />
+        <View style={styles.gymDetails}>
+          <Text style={styles.gymName}>{item.gymName}</Text>
+          <View style={styles.ratingContainer}>
+            <Icon name="star" size={14} color="#FFD700" />
+            <Text style={styles.ratingText}>{item.rating} ({item.reviews} Reviews)</Text>
+          </View>
+
+          {/* Add Price and Booking ID */}
+          <Text style={styles.bookingIdText}>Booking ID: {item.bookingId}</Text>
+          <Text style={styles.priceText}>Price: ${item.price}</Text>
+
+          {/* Invites and Add More Options */}
+          <View style={styles.inviteAddMoreContainer}>
+            <Text style={styles.inviteText}>
+              <Icon name="users" size={14} color="#777" /> {item.invites} Invites
+            </Text>
+            <View style={styles.addMoreContainer}>
+              <Text style={styles.addMoreText}>Add More</Text>
+              <View style={styles.addMoreButton}>
+                <Text style={styles.addMoreButtonText}>+1</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Move Cancel Button Below the Add More Options */}
+          {selectedTab === 'Upcoming' && (
+            <View style={styles.cardFooter}>
+              <TouchableOpacity style={styles.cancelButton}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Move Book Again Button to Card Footer */}
+      {selectedTab === 'Completed' && (
+        <View style={styles.cardFooter}>
+          <TouchableOpacity style={styles.bookAgainButton}>
+            <Text style={styles.bookAgainButtonText}>Book Again</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
-
-  if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
-  }
-
-  if (error) {
-    return <Text style={styles.errorText}>{error}</Text>;
-  }
 
   return (
     <View style={styles.container}>
-      <CustomHeader />
-      {/* Tabs for Upcoming and Completed */}
+      {/* Header */}
+      <Text style={styles.headerText}>My bookings</Text>
+
+      {/* Tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 'Upcoming' && styles.activeTab]}
+          style={[
+            styles.tabButton,
+            selectedTab === 'Upcoming' && styles.activeTabButton,
+          ]}
           onPress={() => setSelectedTab('Upcoming')}
         >
-          <Text style={styles.tabText}>Upcoming</Text>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === 'Upcoming' && styles.activeTabText,
+            ]}
+          >
+            Upcoming
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 'Completed' && styles.activeTab]}
+          style={[
+            styles.tabButton,
+            selectedTab === 'Completed' && styles.activeTabButton,
+          ]}
           onPress={() => setSelectedTab('Completed')}
         >
-          <Text style={styles.tabText}>Completed</Text>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === 'Completed' && styles.activeTabText,
+            ]}
+          >
+            Completed
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {/* List of bookings filtered based on the selected tab */}
+      {/* Booking List */}
       <FlatList
-        data={filteredBookings}
-        keyExtractor={(item) => item.bookingId}
-        renderItem={renderBookingItem}
-        ListEmptyComponent={<Text>No bookings found</Text>}
+        data={bookings}
+        keyExtractor={(item) => item.id}
+        renderItem={renderBooking}
+        contentContainerStyle={styles.listContent}
       />
-      <Footer navigation={navigation} />
+    <View style={styles.footer}>
+        <Footer navigation={navigation} />
+      </View>
     </View>
   );
-};
-
-// Styles
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-   
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'flex-end',
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 20,
   },
   tabContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
+    justifyContent: 'center',
+    marginBottom: 10,
   },
   tabButton: {
     padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    marginHorizontal: 5,
+    width: '45%',
+    alignItems: 'center',
   },
-  activeTab: {
+  activeTabButton: {
     backgroundColor: '#4CAF50',
   },
   tabText: {
-    color: '#000',
-    fontSize: 16,
+    color: '#777',
     fontWeight: 'bold',
+  },
+  activeTabText: {
+    color: '#fff',
   },
   bookingCard: {
-    padding: 16,
-    marginVertical: 8,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  cardHeader: {
+    marginBottom: 10,
+  },
+  bookingDate: {
+    fontSize: 14,
+    color: '#777',
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationText: {
+    marginLeft: 5,
+    fontSize: 14,
+    color: '#555',
+  },
+  cardBody: {
+    flexDirection: 'row',
+  },
+  gymImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
+  gymDetails: {
+    marginLeft: 10,
+    flex: 1,
   },
   gymName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 8,
   },
-  buttonContainer: {
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingText: {
+    marginLeft: 5,
+    color: '#777',
+  },
+  priceText: {
+    fontSize: 14,
+    color: '#4CAF50',
+    marginTop: 5,
+  },
+  bookingIdText: {
+    fontSize: 12,
+    color: '#777',
+    marginTop: 2,
+  },
+  inviteAddMoreContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
+    alignItems: 'center',
+    marginTop: 5,
   },
-  viewDetailsButton: {
-    padding: 10,
-    backgroundColor: '#4CAF50',
-    borderRadius: 8,
-    flex: 1,
-    marginRight: 10,
+  inviteText: {
+    fontSize: 14,
+    color: '#777',
   },
-  cancelButton: {
-    padding: 10,
-    backgroundColor: '#ff1744',
-    borderRadius: 8,
-    flex: 1,
+  addMoreContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  buttonText: {
-    color: '#fff',
-    textAlign: 'center',
+  addMoreText: {
+    fontSize: 14,
+    color: '#777',
+    marginRight: 5,
+  },
+  addMoreButton: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 5,
+    padding: 5,
+  },
+  addMoreButtonText: {
     fontWeight: 'bold',
   },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 10,
+  },
+  cancelButton: {
+    backgroundColor: '#f44336',
+    borderRadius: 5,
+    padding: 8, // Reduced padding
+    alignItems: 'center',
+    width: '30%', // Adjusted width for smaller button
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14, // Reduced font size
+  },
+  bookAgainButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 5,
+    padding: 8, // Reduced padding
+    alignItems: 'center',
+    width: '30%', // Adjusted width for smaller button
+  },
+  bookAgainButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14, // Reduced font size
+  },
+  listContent: {
+    paddingBottom: 20,
   },
 });
-
-export default BookingScreen;
