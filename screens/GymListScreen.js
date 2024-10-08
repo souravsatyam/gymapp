@@ -35,7 +35,7 @@ export default function GymListScreen({ navigation }) {
   const [error, setError] = useState('');
   const limit = 9;
 
-  const GOOGLE_MAPS_API_KEY = '<<API_KEY>>';  // Replace with your actual API key
+  const GOOGLE_MAPS_API_KEY = 'AIzaSyCe_VHcmc7i6jbNl0oFDVHwQyavPgYFU10';  // Replace with your actual API key
 
   const fetchGyms = async (lat, long, searchText = '', page = 1) => {
     if ((loading || !hasMoreGyms) && !searchText) return; 
@@ -43,8 +43,9 @@ export default function GymListScreen({ navigation }) {
     setError('');
     try {
       const gymList = await fetchAllGyms(lat, long, searchText, limit, page, pincode);
+      console.log("gymList received", gymList);
       if (gymList.length > 0) {
-        setGyms((prevGyms) => [...prevGyms, ...gymList]);
+        setGyms(gymList);
       } else {
         setHasMoreGyms(false); 
       }
@@ -81,6 +82,7 @@ export default function GymListScreen({ navigation }) {
     try {
       const response = await axios.get(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${long}&localityLanguage=en`);
       if (response.data) {
+        
         setAddress(response.data.city || response.data.locality || 'Unknown location');
       }
     } catch (error) {
@@ -111,7 +113,7 @@ export default function GymListScreen({ navigation }) {
       const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${pincode}&key=${GOOGLE_MAPS_API_KEY}`);
       if (response.data.results && response.data.results.length > 0) {
         const location = response.data.results[0].geometry.location;
-        setCurrentLocation(location); 
+        fetchAddress(location.lat, location.lng);
         fetchGyms(location.lat, location.lng, searchText, 1); // Fetch gyms for the new location
       } else {
         setError('Invalid pincode or no results found.');
@@ -128,7 +130,7 @@ export default function GymListScreen({ navigation }) {
 
   const validatePincode = () => {
     if (!pincode || pincode.length !== 6 || isNaN(pincode)) {
-      Alert.alert('Invalid Pincode', 'Please enter a valid 6-digit pincode.');
+      //Alert.alert('Invalid Pincode', 'Please enter a valid 6-digit pincode.');
       return false;
     }
     return true;
@@ -223,7 +225,7 @@ export default function GymListScreen({ navigation }) {
         onEndReachedThreshold={0.5}
         ListFooterComponent={hasMoreGyms && !loading ? <Text style={styles.loadMoreText}>Loading more gyms...</Text> : null}
       />
-      <Footer />
+      <Footer navigation={navigation} />
     </KeyboardAvoidingView>
   );
 }
